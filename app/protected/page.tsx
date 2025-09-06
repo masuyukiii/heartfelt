@@ -1257,24 +1257,12 @@ export default function ProtectedPage() {
                   </label>
                   
                   {/* キーワードタグ */}
-                  <div className="mb-2">
-                    <style jsx>{`
-                      @keyframes fadeInOut {
-                        0% { opacity: 0; transform: translateY(-5px); }
-                        20% { opacity: 1; transform: translateY(0); }
-                        80% { opacity: 1; transform: translateY(0); }
-                        100% { opacity: 0; transform: translateY(5px); }
-                      }
-                      .keyword-tag {
-                        animation: fadeInOut 3s ease-in-out;
-                      }
-                    `}</style>
+                  <div className="mb-2 min-h-[28px]">
                     <div className="flex flex-wrap gap-1.5" key={currentKeywords.join(',')}>
                       {currentKeywords.map((keyword, index) => (
                         <span
                           key={`${keyword}-${index}`}
-                          className="keyword-tag inline-block px-2 py-0.5 text-xs text-pink-600 bg-pink-50 border border-pink-200 rounded-full"
-                          style={{ animationDelay: `${index * 0.1}s` }}
+                          className="inline-block px-2 py-0.5 text-xs text-pink-600 bg-pink-50 border border-pink-200 rounded-full animate-pulse"
                         >
                           {keyword}
                         </span>
