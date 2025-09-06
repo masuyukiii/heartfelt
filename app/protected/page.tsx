@@ -344,6 +344,8 @@ export default function ProtectedPage() {
   };
 
   const openProfileEditModal = () => {
+    console.log('Profile edit button clicked');
+    console.log('Profile data:', profileData);
     setEditProfileName(profileData.name);
     setEditProfileDepartment(profileData.department);
     setEditProfileBio(profileData.bio);
@@ -910,8 +912,13 @@ export default function ProtectedPage() {
             <div className="absolute inset-0 bg-white/10"></div>
             <div className="absolute top-2 right-2 flex space-x-1">
               <button
-                onClick={openProfileEditModal}
-                className="text-white hover:bg-white/30 hover:scale-110 rounded-full p-3 transition-all duration-200 cursor-pointer select-none"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  console.log('Button click event triggered');
+                  openProfileEditModal();
+                }}
+                className="text-white hover:bg-white/30 hover:scale-110 rounded-full p-3 transition-all duration-200 cursor-pointer select-none relative z-50"
                 title="プロフィールを編集"
               >
                 <span className="text-lg">👤</span>
