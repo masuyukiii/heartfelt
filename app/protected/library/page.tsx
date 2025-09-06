@@ -256,43 +256,45 @@ export default function LibraryPage() {
             </p>
           </div>
         ) : (
-          <div className="relative min-h-96 bg-gradient-to-br from-sky-100/50 to-blue-200/30 rounded-3xl p-8 shadow-inner">
-            {filteredWords.map((word, index) => {
-              const style = getCloudStyle(index, filteredWords.length);
-              const sizeClass = getCloudSize(word.message_content);
-              
-              return (
-                <div
-                  key={word.id}
-                  className="absolute cursor-pointer transition-all duration-300 hover:scale-110 hover:z-10"
-                  style={style}
-                  onClick={() => setSelectedWord(word)}
-                >
-                  <div
-                    className={`${sizeClass} bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border-2 ${
-                      word.message_type === 'thanks' 
-                        ? 'border-green-300 hover:border-green-500' 
-                        : 'border-blue-300 hover:border-blue-500'
-                    } hover:shadow-xl transition-all duration-300 max-w-xs`}
-                  >
-                    <div className="flex items-center mb-1">
-                      <span className="text-lg mr-2">
-                        {word.message_type === 'thanks' ? '💚' : '💭'}
-                      </span>
-                      <span className="text-xs text-gray-500">
+          <div className="space-y-4">
+            {filteredWords.map((word) => (
+              <div
+                key={word.id}
+                className={`bg-white rounded-lg shadow-md p-4 border-l-4 transition-all duration-200 cursor-pointer hover:shadow-lg ${
+                  word.message_type === 'thanks' 
+                    ? 'border-green-500' 
+                    : 'border-blue-500'
+                }`}
+                onClick={() => setSelectedWord(word)}
+              >
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex items-center space-x-3">
+                    <span className="text-lg">
+                      {word.message_type === 'thanks' ? '💚' : '💭'}
+                    </span>
+                    <div className="flex items-center space-x-2">
+                      <span className="font-semibold text-gray-800">
                         {word.original_sender_name || '匿名'}
                       </span>
-                    </div>
-                    <p className="text-gray-800 font-medium line-clamp-3">
-                      {word.message_content}
-                    </p>
-                    <div className="text-xs text-gray-500 mt-2">
-                      {formatTimeAgo(new Date(word.saved_at))}
+                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                        word.message_type === 'thanks' 
+                          ? 'bg-green-100 text-green-800' 
+                          : 'bg-blue-100 text-blue-800'
+                      }`}>
+                        {word.message_type === 'thanks' ? 'ありがとう' : '本音'}
+                      </span>
                     </div>
                   </div>
+                  <span className="text-xs text-gray-500">
+                    {formatTimeAgo(new Date(word.saved_at))}
+                  </span>
                 </div>
-              );
-            })}
+                
+                <p className="text-gray-700 leading-relaxed">
+                  {word.message_content}
+                </p>
+              </div>
+            ))}
           </div>
         )}
 
