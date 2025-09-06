@@ -15,7 +15,7 @@ import { getAIFeedback, type ChatMessage } from '@/lib/claude/ai-assistant';
 function getGrowthStageIcon(totalPoints: number, targetPoints: number) {
   if (totalPoints === 0) return '/images/growth-stages/seed.png'; // タネ
   const percentage = (totalPoints / targetPoints) * 100;
-  if (percentage <= 10) return '🌱'; // 芽
+  if (percentage <= 10) return '/images/growth-stages/sprout.gif'; // 芽
   if (percentage <= 30) return '🌿'; // 若葉
   if (percentage <= 60) return '🌲'; // 小木
   if (percentage <= 90) return '🌳'; // 木
