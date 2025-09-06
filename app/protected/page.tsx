@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Heart, MessageCircle, TreePine, Gift, CloudRain, Plus, Send } from "lucide-react";
+import { Heart, MessageCircle, TreePine, Gift, CloudRain, Send } from "lucide-react";
 
 export default async function ProtectedPage() {
   const supabase = await createClient();
