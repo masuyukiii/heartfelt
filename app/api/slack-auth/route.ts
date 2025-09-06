@@ -13,8 +13,7 @@ export async function GET(request: NextRequest) {
       client_id: SLACK_CLIENT_ID || '',
       scope: 'incoming-webhook',
       user_scope: 'chat:write',
-      redirect_uri: `${process.env.NEXT_PUBLIC_APP_URL}/api/slack-auth`,
-      state: 'heartfelt-slack-auth'
+      redirect_uri: `${process.env.NEXT_PUBLIC_APP_URL}/api/slack-auth`
     })
     
     return NextResponse.redirect(authUrl)
