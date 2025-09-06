@@ -1405,13 +1405,13 @@ export default function DashboardDemoPage() {
 
                 {/* プリセットボタン */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3">プリセット例</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-3">ご褒美ゴール例</label>
                   <div className="grid grid-cols-2 gap-2">
                     {[
-                      { title: 'カフェタイム', desc: 'お気に入りのカフェで読書', points: 30 },
-                      { title: '映画鑑賞', desc: '気になっていた映画を見る', points: 25 },
-                      { title: 'スパでリラックス', desc: 'マッサージで疲れをリセット', points: 50 },
-                      { title: '美味しいディナー', desc: '行きたかったレストランで', points: 40 }
+                      { title: 'ランチ', desc: '美味しいランチでリフレッシュ', points: 30 },
+                      { title: '美味しいディナー', desc: '行きたかったレストランで', points: 50 },
+                      { title: 'スパでリラックス', desc: 'マッサージで疲れをリセット', points: 70 },
+                      { title: '豪華旅行', desc: '憧れの場所へ特別な旅', points: 100 }
                     ].map((preset, index) => (
                       <button
                         key={index}
