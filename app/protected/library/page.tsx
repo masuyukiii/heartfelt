@@ -143,7 +143,7 @@ export default function LibraryPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sky-50 via-blue-50 to-indigo-100 px-4 py-6 sm:px-6 sm:py-8">
+    <div className="min-h-screen bg-gradient-to-br from-sky-50 via-blue-50 to-indigo-100">
       {/* 雲の背景パターン */}
       <div className="fixed inset-0 pointer-events-none opacity-10">
         <div className="absolute top-10 left-10 text-6xl">☁️</div>
@@ -153,9 +153,9 @@ export default function LibraryPage() {
         <div className="absolute top-1/3 left-1/2 text-4xl">☁️</div>
       </div>
 
-      <div className="max-w-md mx-auto p-4 space-y-4 relative z-10">
+      <div className="max-w-md mx-auto p-4 relative z-10">
         {/* ヘッダー */}
-        <div className="text-center">
+        <div className="text-center mb-4">
           <div className="flex items-center justify-center mb-2">
             <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mr-2">
               <span className="text-white text-sm">☁️</span>
@@ -170,7 +170,7 @@ export default function LibraryPage() {
         </div>
 
         {/* ダッシュボードに戻るボタン */}
-        <div className="text-center">
+        <div className="text-center mb-4">
           <button
             onClick={() => window.location.href = '/protected'}
             className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-1.5 rounded-lg text-xs transition-colors"
@@ -179,9 +179,8 @@ export default function LibraryPage() {
           </button>
         </div>
 
-
         {/* フィルター */}
-        <div className="flex bg-white/70 backdrop-blur-sm rounded-lg p-1 shadow-sm">
+        <div className="flex bg-white/70 backdrop-blur-sm rounded-lg p-1 shadow-sm mb-4">
           <button
             onClick={() => setFilter('all')}
             className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
@@ -233,7 +232,7 @@ export default function LibraryPage() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-3 gap-2 mb-4">
             {filteredWords.map((word) => (
               <div
                 key={word.id}
