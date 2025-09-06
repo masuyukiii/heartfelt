@@ -92,13 +92,15 @@ export default function ProtectedPage() {
   const [profileData, setProfileData] = useState({
     name: 'あなたの名前',
     department: 'あなたの部署',
-    bio: 'よろしくお願いします！'
+    bio: 'よろしくお願いします！',
+    slackWebhookUrl: ''
   });
 
   // プロフィール編集用の一時状態
   const [editProfileName, setEditProfileName] = useState('');
   const [editProfileDepartment, setEditProfileDepartment] = useState('');
   const [editProfileBio, setEditProfileBio] = useState('');
+  const [editProfileSlackWebhookUrl, setEditProfileSlackWebhookUrl] = useState('');
 
   const totalPoints = mockData.thanksPoints + mockData.honestyPoints;
   const remainingPoints = Math.max(rewardGoal.requiredPoints - totalPoints, 0);
@@ -349,6 +351,7 @@ export default function ProtectedPage() {
     setEditProfileName(profileData.name);
     setEditProfileDepartment(profileData.department);
     setEditProfileBio(profileData.bio);
+    setEditProfileSlackWebhookUrl(profileData.slackWebhookUrl);
     setShowProfileEditModal(true);
   };
 
@@ -357,18 +360,26 @@ export default function ProtectedPage() {
     setEditProfileName('');
     setEditProfileDepartment('');
     setEditProfileBio('');
+    setEditProfileSlackWebhookUrl('');
   };
 
   const handleSaveProfile = async () => {
     try {
       const result = await updateProfile({
         name: editProfileName || 'あなたの名前',
-        department: editProfileDepartment || 'あなたの部署'
+        department: editProfileDepartment || 'あなたの部署',
+        slackWebhookUrl: editProfileSlackWebhookUrl
       });
 
       if (result.success) {
-        // プロフィールデータを再読み込み
-        await loadProfile();
+        // プロフィールデータの更新
+        setProfileData(prev => ({
+          ...prev,
+          name: editProfileName || prev.name,
+          department: editProfileDepartment || prev.department,
+          bio: editProfileBio || prev.bio,
+          slackWebhookUrl: editProfileSlackWebhookUrl
+        }));
         closeProfileEditModal();
         alert('プロフィール情報を更新しました！');
       } else {
@@ -1445,6 +1456,29 @@ export default function ProtectedPage() {
                     className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-gray-500 focus:outline-none resize-none transition-colors duration-200"
                   />
                   <div className="text-xs text-gray-500 mt-1">{editProfileBio.length}/200文字</div>
+                </div>
+
+                {/* Slack Webhook URL */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                    💬 Slack通知設定（オプション）
+                  </label>
+                  <input
+                    type="url"
+                    value={editProfileSlackWebhookUrl}
+                    onChange={(e) => setEditProfileSlackWebhookUrl(e.target.value)}
+                    placeholder="https://hooks.slack.com/services/..."
+                    className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-gray-500 focus:outline-none transition-colors duration-200"
+                  />
+                  <div className="text-xs text-gray-500 mt-2">
+                    <p>Slack Webhook URLを設定すると、メッセージ受信時にSlackに通知が届きます</p>
+                    <p className="mt-1">
+                      <span className="font-medium">設定方法:</span> 
+                      <a href="https://api.slack.com/messaging/webhooks" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline ml-1">
+                        Slack Webhookガイド
+                      </a>
+                    </p>
+                  </div>
                 </div>
 
                 {/* 保存ボタン */}

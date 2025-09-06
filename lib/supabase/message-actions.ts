@@ -1,4 +1,6 @@
 import { createClient } from '@/lib/supabase/client'
+import { SlackService } from '@/lib/slack/slack-client'
+import { getCurrentUserProfile } from '@/lib/supabase/profile-actions'
 
 export interface Message {
   id: string
@@ -56,6 +58,33 @@ export async function sendMessage(data: {
         throw new Error('データベーステーブルが設定されていません。管理者にお問い合わせください。')
       }
       throw new Error(`メッセージ送信エラー: ${error.message}`)
+    }
+
+    // Slack通知を送信（受信者のWebhook URLが設定されている場合）
+    try {
+      const { data: recipientProfile, error: recipientError } = await supabase
+        .from('profiles')
+        .select('slack_webhook_url, name')
+        .eq('id', data.recipientId)
+        .single()
+
+      const senderProfile = await getCurrentUserProfile()
+      const senderName = senderProfile?.name || user.email?.split('@')[0] || '匿名ユーザー'
+
+      if (!recipientError && recipientProfile?.slack_webhook_url) {
+        console.log('🔔 Sending Slack notification to recipient...')
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://heartfelt.vercel.app'
+        
+        await SlackService.sendNotification(recipientProfile.slack_webhook_url, {
+          senderName,
+          messageType: data.type,
+          content: data.content.trim(),
+          appUrl
+        })
+      }
+    } catch (slackError) {
+      console.error('Slack notification error:', slackError)
+      // Slack通知エラーは本体機能に影響させない
     }
 
     return { success: true }

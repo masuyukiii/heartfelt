@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/client'
 
-export async function updateProfile(data: { name: string; department?: string }) {
+export async function updateProfile(data: { name: string; department?: string; slackWebhookUrl?: string }) {
   const supabase = createClient()
   
   try {
@@ -15,6 +15,7 @@ export async function updateProfile(data: { name: string; department?: string })
       .update({
         name: data.name.trim(),
         department: data.department?.trim() || null,
+        slack_webhook_url: data.slackWebhookUrl?.trim() || null,
         updated_at: new Date().toISOString()
       })
       .eq('id', user.id)
