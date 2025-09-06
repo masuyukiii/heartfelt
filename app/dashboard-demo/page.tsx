@@ -983,31 +983,31 @@ export default function DashboardDemoPage() {
             </div>
 
             {/* 植物エリア */}
-            <div className="bg-gradient-to-b from-sky-50 to-emerald-50 rounded-2xl p-8 mb-6 relative overflow-hidden">
+            <div className="bg-gradient-to-b from-sky-50 to-emerald-50 rounded-2xl p-6 mb-4 relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-transparent"></div>
               <div className="relative z-10 text-center">
-                <div className="text-7xl mb-4 filter drop-shadow-lg animate-pulse">
+                <div className="text-5xl mb-3 filter drop-shadow-lg animate-pulse">
                   {getGrowthStageIcon(totalPoints, rewardGoal.requiredPoints)}
                 </div>
-                <p className="text-emerald-700 font-medium text-sm whitespace-pre-line">
-                  {getGrowthMessage(totalPoints, rewardGoal.requiredPoints)}
-                </p>
-                <div className="mt-3 inline-flex items-center bg-white/60 backdrop-blur-sm px-3 py-1 rounded-full">
+                <div className="mt-2 inline-flex items-center bg-white/60 backdrop-blur-sm px-3 py-1 rounded-full mb-2">
                   <span className="text-xs text-gray-600">現在 {totalPoints} ポイント</span>
                 </div>
+                <p className="text-emerald-700 font-medium text-xs whitespace-pre-line">
+                  {getGrowthMessage(totalPoints, rewardGoal.requiredPoints)}
+                </p>
               </div>
             </div>
 
-            {/* ポイント詳細 */}
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              <div className="bg-gradient-to-br from-pink-50 to-rose-50 rounded-xl p-4 text-center border border-pink-100">
-                <div className="text-2xl mb-2">💖</div>
-                <div className="text-2xl font-bold text-pink-600">{mockData.thanksPoints}</div>
+            {/* ポイント詳細（コンパクト版） */}
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              <div className="bg-gradient-to-br from-pink-50 to-rose-50 rounded-lg p-3 text-center border border-pink-100">
+                <div className="text-lg mb-1">💖</div>
+                <div className="text-lg font-bold text-pink-600">{mockData.thanksPoints}</div>
                 <div className="text-xs text-pink-700">ありがとう</div>
               </div>
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4 text-center border border-blue-100">
-                <div className="text-2xl mb-2">💭</div>
-                <div className="text-2xl font-bold text-blue-600">{mockData.honestyPoints}</div>
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-3 text-center border border-blue-100">
+                <div className="text-lg mb-1">💭</div>
+                <div className="text-lg font-bold text-blue-600">{mockData.honestyPoints}</div>
                 <div className="text-xs text-blue-700">本音</div>
               </div>
             </div>
