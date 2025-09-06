@@ -70,7 +70,9 @@ export default function ProtectedPage() {
     'おかげで乗り越えられた', 'すごいと思った', '助かりました', '感動しました',
     'いつもありがとう', '心強かった', '成長できました', '励みになりました',
     '新しい発見', '頼りになります', '素晴らしい提案', '丁寧な対応',
-    'フォローありがとう', '気づきをもらえた', 'プロフェッショナル', '配慮に感謝'
+    'フォローありがとう', '気づきをもらえた', 'プロフェッショナル', '配慮に感謝',
+    '感謝しています', 'ナイスアシスト', '完璧な仕事', '期待を超えた',
+    '救われました', '心に響いた', 'お手本にしたい', '刺激を受けた'
   ];
   
   // 受信BOX用の状態
@@ -363,7 +365,7 @@ export default function ProtectedPage() {
     
     const interval = setInterval(() => {
       const shuffled = [...thanksKeywords].sort(() => Math.random() - 0.5);
-      setCurrentKeywords(shuffled.slice(0, 8));
+      setCurrentKeywords(shuffled.slice(0, 10));
     }, 6000);
 
     return () => clearInterval(interval);
@@ -409,9 +411,9 @@ export default function ProtectedPage() {
     setMessage('');
     // モーダルを開くたびにユーザーリストを更新
     loadUsers();
-    // ランダムに8つのキーワードを選択
+    // ランダムに10個のキーワードを選択
     const shuffled = [...thanksKeywords].sort(() => Math.random() - 0.5);
-    setCurrentKeywords(shuffled.slice(0, 8));
+    setCurrentKeywords(shuffled.slice(0, 10));
   };
 
   const openHonestyModal = () => {
