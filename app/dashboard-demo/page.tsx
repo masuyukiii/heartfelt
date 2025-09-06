@@ -94,20 +94,12 @@ export default function DashboardDemoPage() {
   const [newMotivationContent, setNewMotivationContent] = useState('');
   const [currentMotivationIndex, setCurrentMotivationIndex] = useState(0);
 
-  // 個人ご褒美設定のデータベース（実際にはSupabaseやローカルストレージから取得）
-  const [userRewardSettings, setUserRewardSettings] = useState([
-    { id: 1, userName: '田中さん', title: 'カフェタイム', description: 'お気に入りのカフェで読書', points: 30 },
-    { id: 2, userName: '佐藤さん', title: '美味しいディナー', description: 'おしゃれなレストランで', points: 50 },
-    { id: 3, userName: '鈴木さん', title: 'スパでリラックス', description: 'マッサージで疲れをリセット', points: 70 },
-    { id: 4, userName: '山田さん', title: 'ちょっと豪華なランチ', description: '友達と楽しいひと時', points: 30 },
-    { id: 5, userName: '高橋さん', title: '憧れの場所へ特別な旅行', description: '温泉旅館でゆったりと', points: 100 }
-  ]);
-  const [currentRewardIndex, setCurrentRewardIndex] = useState(0);
+  // userRewardSettingsとcurrentRewardIndexは削除（固定ゴール表示のため不要）
 
-  // ご褒美ゴール設定
+  // ご褒美ゴール設定（チーム固定）
   const [rewardGoal, setRewardGoal] = useState({
-    title: 'カフェで読書タイム',
-    description: 'お気に入りのカフェでゆっくり読書を楽しむ',
+    title: 'カフェタイム',
+    description: 'お気に入りのカフェで読書',
     requiredPoints: 30
   });
 
@@ -261,22 +253,7 @@ export default function DashboardDemoPage() {
     return () => clearInterval(interval);
   }, [motivations]);
 
-  // ご褒美設定を5秒ごとにランダムに切り替え
-  useEffect(() => {
-    if (userRewardSettings.length <= 1) return;
-
-    const interval = setInterval(() => {
-      setCurrentRewardIndex(prev => {
-        let newIndex;
-        do {
-          newIndex = Math.floor(Math.random() * userRewardSettings.length);
-        } while (newIndex === prev && userRewardSettings.length > 1);
-        return newIndex;
-      });
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [userRewardSettings]);
+  // ご褒美設定のuseEffectは削除（固定表示のため不要）
 
   const addPoints = (type: 'thanks' | 'honesty') => {
     setMockData(prev => ({
@@ -380,16 +357,6 @@ export default function DashboardDemoPage() {
 
   const handleSaveGoal = () => {
     if (!editGoalTitle.trim()) return;
-
-    // 個人のご褒美設定をデータベースに保存
-    const userRewardSetting = {
-      id: Date.now(),
-      userName: profileData.name,
-      title: editGoalTitle,
-      description: editGoalDescription,
-      points: editGoalPoints
-    };
-    setUserRewardSettings(prev => [userRewardSetting, ...prev]);
 
     const newGoal = {
       title: editGoalTitle,
@@ -917,18 +884,11 @@ export default function DashboardDemoPage() {
               <div className="inline-flex items-center justify-center w-12 h-12 bg-white/20 rounded-full mb-3">
                 <span className="text-2xl">🎯</span>
               </div>
-              {userRewardSettings.length > 0 && (
-                <div key={currentRewardIndex} className="motivation-fade-in">
-                  <h1 className="text-white text-xl font-bold tracking-wide">
-                    ご褒美ゴール：{userRewardSettings[currentRewardIndex]?.title}
-                  </h1>
-                  {userRewardSettings[currentRewardIndex]?.description && (
-                    <p className="text-emerald-200 text-xs mt-1 opacity-80">{userRewardSettings[currentRewardIndex]?.description}</p>
-                  )}
-                  <p className="text-emerald-300 text-xs mt-1 opacity-60">
-                    by {userRewardSettings[currentRewardIndex]?.userName} ({userRewardSettings[currentRewardIndex]?.points}pt)
-                  </p>
-                </div>
+              <h1 className="text-white text-xl font-bold tracking-wide">
+                ご褒美ゴール：{rewardGoal.title}
+              </h1>
+              {rewardGoal.description && (
+                <p className="text-emerald-200 text-xs mt-1 opacity-80">{rewardGoal.description}</p>
               )}
             </div>
           </div>
