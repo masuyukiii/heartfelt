@@ -90,6 +90,7 @@ export default function DashboardDemoPage() {
   const [isMotivationModalOpen, setIsMotivationModalOpen] = useState(false);
   const [newMotivationName, setNewMotivationName] = useState('');
   const [newMotivationContent, setNewMotivationContent] = useState('');
+  const [currentMotivationIndex, setCurrentMotivationIndex] = useState(0);
 
   // ご褒美ゴール設定
   const [rewardGoal, setRewardGoal] = useState({
@@ -230,6 +231,23 @@ export default function DashboardDemoPage() {
   useEffect(() => {
     localStorage.setItem('heartfelt-demo-points', JSON.stringify(mockData));
   }, [mockData]);
+
+  // 意気込みを5秒ごとにランダムに切り替え
+  useEffect(() => {
+    if (motivations.length <= 1) return;
+
+    const interval = setInterval(() => {
+      setCurrentMotivationIndex(prev => {
+        let newIndex;
+        do {
+          newIndex = Math.floor(Math.random() * motivations.length);
+        } while (newIndex === prev && motivations.length > 1);
+        return newIndex;
+      });
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [motivations]);
 
   const addPoints = (type: 'thanks' | 'honesty') => {
     setMockData(prev => ({
@@ -789,6 +807,15 @@ export default function DashboardDemoPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50">
+      <style jsx global>{`
+        @keyframes fadeIn {
+          0% { opacity: 0; transform: translateY(10px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+        .motivation-fade-in {
+          animation: fadeIn 1s ease-in-out;
+        }
+      `}</style>
       {/* セレブレーション */}
       {showCelebration && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm">
@@ -1401,21 +1428,20 @@ export default function DashboardDemoPage() {
                     💪 みんなの意気込み
                     <span className="text-xs text-gray-500 ml-2">（目標達成に向けた応援メッセージ）</span>
                   </label>
-                  <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 h-24 overflow-hidden relative">
-                    <div className="motivation-scroll space-y-2">
-                      {motivations.slice(0, 3).map((motivation, index) => (
-                        <div key={motivation.id} className="text-sm text-gray-700 animate-fade-in" style={{animationDelay: `${index * 2}s`}}>
-                          <span className={`font-medium ${
-                            index === 0 ? 'text-blue-600' : 
-                            index === 1 ? 'text-green-600' : 
-                            'text-purple-600'
-                          }`}>
-                            {motivation.name}：
-                          </span>
-                          "{motivation.content}"
+                  <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 h-24 overflow-hidden relative flex items-center justify-center">
+                    {motivations.length > 0 && (
+                      <div 
+                        className="text-sm text-gray-700 text-center motivation-fade-in" 
+                        key={currentMotivationIndex}
+                      >
+                        <div className="font-medium text-blue-600 mb-1">
+                          {motivations[currentMotivationIndex]?.name}
                         </div>
-                      ))}
-                    </div>
+                        <div className="text-gray-800">
+                          "{motivations[currentMotivationIndex]?.content}"
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <button 
                     className="mt-2 text-xs text-blue-600 hover:text-blue-800 underline"
