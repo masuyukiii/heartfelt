@@ -79,33 +79,9 @@ export async function postToSlack(message: {
     
     const slackMessage = {
       channel: settings.channel,
-      username: 'Heartfelt',
+      username: 'Heartfelt Bot',
       icon_emoji: ':heart:',
-      text: `${emoji} *${typeText}メッセージが送られました！*`,
-      attachments: [
-        {
-          color: message.type === 'thanks' ? '#22c55e' : '#3b82f6',
-          fields: [
-            {
-              title: '送信者',
-              value: message.sender_name,
-              short: true
-            },
-            {
-              title: '受信者',
-              value: message.recipient_name,
-              short: true
-            },
-            {
-              title: 'メッセージ',
-              value: message.content,
-              short: false
-            }
-          ],
-          footer: 'Heartfelt - 心を繋ぐコミュニケーション',
-          ts: Math.floor(Date.now() / 1000)
-        }
-      ]
+      text: `${emoji} ${message.sender_name}さんから${message.recipient_name}さんへ「${typeText}メッセージ」が届いたよ！\n\n内容はこれだよ：\n> ${message.content}`
     }
     
     const response = await fetch(settings.webhook_url, {
