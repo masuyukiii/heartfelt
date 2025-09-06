@@ -153,19 +153,19 @@ export default function LibraryPage() {
         <div className="absolute top-1/3 left-1/2 text-4xl">☁️</div>
       </div>
 
-      <div className="max-w-md mx-auto space-y-6 sm:space-y-8 relative z-10">
+      <div className="max-w-md mx-auto space-y-4 relative z-10">
         {/* ヘッダー */}
-        <div className="text-center space-y-4">
-          <div className="flex items-center justify-center mb-3">
-            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mr-3 shadow-lg">
-              <span className="text-white text-xl">☁️</span>
+        <div className="text-center">
+          <div className="flex items-center justify-center mb-2">
+            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mr-2">
+              <span className="text-white text-sm">☁️</span>
             </div>
-            <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
+            <h1 className="text-xl font-bold text-slate-900">
               ことばライブラリ
             </h1>
           </div>
-          <p className="text-slate-600 text-sm leading-relaxed">
-            あなたが保存した心に残る言葉たち
+          <p className="text-slate-600 text-xs">
+            心に残る言葉たち
           </p>
         </div>
 
@@ -173,9 +173,9 @@ export default function LibraryPage() {
         <div className="text-center">
           <button
             onClick={() => window.location.href = '/protected'}
-            className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg font-semibold transition-colors text-sm"
+            className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-1.5 rounded-lg text-xs transition-colors"
           >
-            ← ダッシュボードに戻る
+            ← 戻る
           </button>
         </div>
 
@@ -214,54 +214,54 @@ export default function LibraryPage() {
           </button>
         </div>
 
-        {/* 言葉の雲 */}
+        {/* 言葉の表示 */}
         {isLoadingWords ? (
-          <div className="text-center py-12">
-            <div className="animate-spin w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full mx-auto"></div>
-            <p className="text-sm text-gray-500 mt-3">言葉を読み込み中...</p>
+          <div className="text-center py-8">
+            <div className="animate-spin w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full mx-auto"></div>
+            <p className="text-xs text-gray-500 mt-2">読み込み中...</p>
           </div>
         ) : filteredWords.length === 0 ? (
-          <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-12 text-center shadow-lg">
-            <div className="text-6xl mb-4">☁️</div>
-            <p className="text-gray-600 text-lg mb-2">
+          <div className="bg-white/80 rounded-xl p-6 text-center">
+            <div className="text-3xl mb-2">☁️</div>
+            <p className="text-sm text-gray-600 mb-1">
               {filter === 'all' ? '保存した言葉がまだありません' : 
                filter === 'thanks' ? 'ありがとうの言葉がありません' : 
                '本音の言葉がありません'}
             </p>
-            <p className="text-gray-500 text-sm">
-              メッセージを受信して、心に残る言葉を保存してみましょう
+            <p className="text-xs text-gray-500">
+              メッセージを受信して保存してみましょう
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-3 gap-2">
+          <div className="space-y-2">
             {filteredWords.map((word) => (
               <div
                 key={word.id}
-                className="relative rounded-xl transition-all duration-300 cursor-pointer hover:shadow-lg hover:scale-105 p-3"
+                className={`bg-white rounded-lg p-3 border-l-4 cursor-pointer hover:shadow-md transition-shadow duration-200 ${
+                  word.message_type === 'thanks' 
+                    ? 'border-green-500' 
+                    : 'border-blue-500'
+                }`}
                 onClick={() => setSelectedWord(word)}
-                style={{
-                  background: word.message_type === 'thanks' 
-                    ? 'linear-gradient(145deg, #f0fdf4, #dcfce7)'
-                    : 'linear-gradient(145deg, #eff6ff, #dbeafe)',
-                  boxShadow: '3px 3px 6px rgba(0,0,0,0.08), -2px -2px 5px rgba(255,255,255,0.9)',
-                  border: '1px solid rgba(255,255,255,0.5)'
-                }}
               >
-                <div className="text-center mb-2">
-                  <span className="text-xl">
+                <div className="flex items-start gap-2">
+                  <span className="text-lg">
                     {word.message_type === 'thanks' ? '💚' : '💭'}
                   </span>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-medium text-gray-700">
+                        {word.original_sender_name || '匿名'}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        {formatTimeAgo(new Date(word.saved_at))}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-800 line-clamp-2">
+                      {word.message_content}
+                    </p>
+                  </div>
                 </div>
-                
-                <div className="text-center mb-2">
-                  <span className="text-[10px] text-gray-500">
-                    {word.original_sender_name || '匿名'}
-                  </span>
-                </div>
-                
-                <p className="text-[10px] text-gray-600 text-center line-clamp-3 leading-relaxed">
-                  {word.message_content}
-                </p>
               </div>
             ))}
           </div>
@@ -274,9 +274,9 @@ export default function LibraryPage() {
               loadWords();
               loadStats();
             }}
-            className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 shadow-lg hover:shadow-xl"
+            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-xs transition-colors"
           >
-            🔄 ライブラリを更新
+            🔄 更新
           </button>
         </div>
       </div>
