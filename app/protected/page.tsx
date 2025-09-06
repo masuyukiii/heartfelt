@@ -4,6 +4,59 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Heart, MessageCircle, TreePine, Gift, CloudRain, Send } from "lucide-react";
+import Link from "next/link";
+
+// 6段階成長システム関数
+function getGrowthStageIcon(totalPoints: number) {
+  if (totalPoints === 0) return '🌰'; // 種
+  if (totalPoints <= 3) return '🌱'; // 芽
+  if (totalPoints <= 8) return '🌿'; // 小木
+  if (totalPoints <= 15) return '🌳'; // 大木
+  if (totalPoints <= 25) return '🌳'; // 立派な大木
+  return '🌸'; // 花・実
+}
+
+function getGrowthMessage(totalPoints: number) {
+  if (totalPoints === 0) return '種の状態です';
+  if (totalPoints <= 3) return '小さな芽が出ました';
+  if (totalPoints <= 8) return '小さな木になりました';
+  if (totalPoints <= 15) return '大きな木に成長中';
+  if (totalPoints <= 25) return '立派な大木になりました';
+  return '花や実がなる美しい木です';
+}
+
+function getGrowthProgress(totalPoints: number) {
+  const stages = [0, 3, 8, 15, 25, 30];
+  let currentStage = 0;
+  
+  for (let i = 0; i < stages.length - 1; i++) {
+    if (totalPoints <= stages[i + 1]) {
+      currentStage = i;
+      break;
+    }
+  }
+  
+  if (currentStage === stages.length - 1) return 100;
+  
+  const stageStart = stages[currentStage];
+  const stageEnd = stages[currentStage + 1];
+  const progressInStage = totalPoints - stageStart;
+  const stageRange = stageEnd - stageStart;
+  
+  return Math.min((progressInStage / stageRange) * 100, 100);
+}
+
+function getPointsToNextStage(totalPoints: number) {
+  const stages = [0, 3, 8, 15, 25, 30];
+  
+  for (let i = 0; i < stages.length - 1; i++) {
+    if (totalPoints <= stages[i + 1]) {
+      return stages[i + 1] - totalPoints;
+    }
+  }
+  
+  return 0; // 最大段階に達している
+}
 
 export default async function ProtectedPage() {
   const supabase = await createClient();
@@ -88,16 +141,16 @@ export default async function ProtectedPage() {
         </CardHeader>
         <CardContent>
           <div className="flex items-center space-x-4">
-            <div className="text-4xl">🌳</div>
+            <div className="text-4xl">{getGrowthStageIcon(mockData.thanksPoints + mockData.honestyPoints)}</div>
             <div className="flex-1 space-y-2">
               <div className="flex items-center justify-between text-sm">
-                <span>チームの成長度</span>
-                <span className="font-semibold">75%</span>
+                <span>{getGrowthMessage(mockData.thanksPoints + mockData.honestyPoints)}</span>
+                <span className="font-semibold">{mockData.thanksPoints + mockData.honestyPoints}pt</span>
               </div>
               <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
-                <div className="bg-green-500 h-3 rounded-full" style={{ width: '75%' }}></div>
+                <div className="bg-green-500 h-3 rounded-full" style={{ width: `${getGrowthProgress(mockData.thanksPoints + mockData.honestyPoints)}%` }}></div>
               </div>
-              <div className="text-xs text-muted-foreground">次の段階まで 72pt</div>
+              <div className="text-xs text-muted-foreground">次の段階まで {getPointsToNextStage(mockData.thanksPoints + mockData.honestyPoints)}pt</div>
             </div>
           </div>
         </CardContent>
@@ -124,10 +177,12 @@ export default async function ProtectedPage() {
           <div className="p-4 bg-green-50 dark:bg-green-950 rounded-lg">
             <div className="flex items-center justify-between mb-2">
               <h3 className="font-semibold">ポジティブライター ✨</h3>
-              <Button size="sm" variant="outline">
-                <MessageCircle size={14} className="mr-1" />
-                添削
-              </Button>
+              <Link href="/positive-writer">
+                <Button size="sm" variant="outline">
+                  <MessageCircle size={14} className="mr-1" />
+                  添削
+                </Button>
+              </Link>
             </div>
             <p className="text-sm text-muted-foreground">
               メッセージをより良い表現に
@@ -148,10 +203,13 @@ export default async function ProtectedPage() {
           <div className="space-y-2">
             <div className="flex items-center justify-between text-sm">
               <span className="font-medium">個人：カフェタイム</span>
-              <Badge variant="outline" className="text-xs">200pt</Badge>
+              <Badge variant="outline" className="text-xs">30pt</Badge>
             </div>
             <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-              <div className="bg-orange-500 h-2 rounded-full" style={{ width: '63%' }}></div>
+              <div className="bg-orange-500 h-2 rounded-full" style={{ width: `${Math.min((mockData.thanksPoints + mockData.honestyPoints) / 30 * 100, 100)}%` }}></div>
+            </div>
+            <div className="text-xs text-muted-foreground">
+              残り{Math.max(30 - (mockData.thanksPoints + mockData.honestyPoints), 0)}ポイント
             </div>
           </div>
           <div className="space-y-2">

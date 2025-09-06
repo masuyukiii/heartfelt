@@ -2,6 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## 修正が終わったら、commitとpushを自動でしてください
 ## Development Commands
 
 - `npm run dev` - Start development server with Turbopack (runs on localhost:3000)
