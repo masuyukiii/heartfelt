@@ -938,11 +938,6 @@ export default function DashboardDemoPage() {
               <h1 className="text-white text-xl font-bold tracking-wide">
                 ご褒美ゴール：{rewardGoal.title}
               </h1>
-              {teamGoal && (
-                <p className="text-emerald-300 text-xs mt-1 opacity-60">
-                  by {teamGoal.updated_by_name}
-                </p>
-              )}
               {motivations.length > 0 && (
                 <div key={currentMotivationIndex} className="motivation-fade-in mt-2">
                   <p className="text-emerald-100 text-sm">
@@ -1486,7 +1481,14 @@ export default function DashboardDemoPage() {
                     maxLength={50}
                     className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none transition-colors duration-200"
                   />
-                  <div className="text-xs text-gray-500 mt-1">{editGoalTitle.length}/50文字</div>
+                  <div className="flex justify-between items-center mt-1">
+                    <div className="text-xs text-gray-500">{editGoalTitle.length}/50文字</div>
+                    {teamGoal && (
+                      <div className="text-xs text-gray-400">
+                        最終更新：{teamGoal.updated_by_name}（{new Date(teamGoal.updated_at).toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' })}）
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {/* 必要ポイント数 */}
