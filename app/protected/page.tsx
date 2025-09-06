@@ -903,12 +903,6 @@ export default function ProtectedPage() {
                   <p className="text-gray-700 leading-relaxed">
                     {message.content}
                   </p>
-                  
-                  {!message.is_read && (
-                    <div className="mt-3 p-2 bg-green-50 rounded text-sm text-green-700">
-                      💚 このメッセージを読むと+1ポイント獲得！
-                    </div>
-                  )}
                 </div>
               ))}
             </div>
