@@ -22,7 +22,7 @@ export async function createClient() {
   // Validate URL format
   try {
     new URL(supabaseUrl);
-  } catch (error) {
+  } catch {
     throw new Error(
       `無効なSupabase URL: ${supabaseUrl}。正しいURL形式（https://your-project-id.supabase.co）を設定してください。`
     );

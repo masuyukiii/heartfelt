@@ -25,7 +25,7 @@ export async function updateSession(request: NextRequest) {
   // Validate URL format
   try {
     new URL(supabaseUrl);
-  } catch (error) {
+  } catch {
     console.error('無効なSupabase URL:', supabaseUrl);
     return supabaseResponse;
   }
