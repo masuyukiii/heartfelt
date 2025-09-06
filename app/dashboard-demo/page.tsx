@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { getUsers, type User } from '@/lib/supabase/users';
 import { getReceivedMessages, markAsRead, sendMessage, type Message } from '@/lib/supabase/message-actions';
 import { updateProfile, getCurrentUserProfile } from '@/lib/supabase/profile-actions';
+import { saveMotivation, getAllMotivations, getMyMotivation, type Motivation } from '@/lib/supabase/motivation-actions';
 import { getAIFeedback, type ChatMessage } from '@/lib/claude/ai-assistant';
 
 // 6段階成長システム関数（目標割合ベース）
@@ -82,13 +83,8 @@ export default function DashboardDemoPage() {
   const [messageFilter, setMessageFilter] = useState<'unread' | 'all' | 'thanks' | 'honesty'>('all');
 
   // 意気込み機能の状態（初期値は空配列）
-  const [motivations, setMotivations] = useState<Array<{
-    id: number;
-    name: string;
-    content: string;
-    timestamp: Date;
-    isOwn?: boolean; // 自分の意気込みかどうかのフラグ
-  }>>([]);
+  const [motivations, setMotivations] = useState<Motivation[]>([]);
+  const [myMotivation, setMyMotivation] = useState<Motivation | null>(null);
   const [isMotivationModalOpen, setIsMotivationModalOpen] = useState(false);
   const [newMotivationName, setNewMotivationName] = useState('');
   const [newMotivationContent, setNewMotivationContent] = useState('');
@@ -156,6 +152,9 @@ export default function DashboardDemoPage() {
 
     // プロフィールデータをSupabaseから読み込み
     loadProfile();
+    
+    // 意気込みデータを読み込み
+    loadMotivations();
   }, []);
 
   const loadUsers = async () => {
@@ -196,6 +195,24 @@ export default function DashboardDemoPage() {
       }
     } catch (error) {
       console.error('Failed to load profile:', error);
+    }
+  };
+
+  const loadMotivations = async () => {
+    try {
+      // 全員の意気込みを取得
+      const allResult = await getAllMotivations();
+      if (allResult.success && allResult.data) {
+        setMotivations(allResult.data);
+      }
+      
+      // 自分の意気込みを取得
+      const myResult = await getMyMotivation();
+      if (myResult.success) {
+        setMyMotivation(myResult.data || null);
+      }
+    } catch (error) {
+      console.error('Failed to load motivations:', error);
     }
   };
 
@@ -396,32 +413,35 @@ export default function DashboardDemoPage() {
   };
 
   // 意気込み追加機能の処理
-  const handleAddMotivation = () => {
-    if (!newMotivationName.trim() || !newMotivationContent.trim()) {
-      alert('名前と意気込みの両方を入力してください');
+  const handleAddMotivation = async () => {
+    if (!newMotivationContent.trim()) {
+      alert('意気込みを入力してください');
       return;
     }
 
-    // 既存の自分の意気込みを削除
-    const filteredMotivations = motivations.filter(m => !m.isOwn);
-    
-    const newMotivation = {
-      id: Date.now(),
-      name: newMotivationName,
-      content: newMotivationContent,
-      timestamp: new Date(),
-      isOwn: true // 自分の意気込みとしてマーク
-    };
-
-    setMotivations([...filteredMotivations, newMotivation]);
-    setNewMotivationName('');
-    setNewMotivationContent('');
-    setIsMotivationModalOpen(false);
-    alert('意気込みを追加しました！');
+    try {
+      const result = await saveMotivation(newMotivationContent);
+      if (result.success) {
+        // データを再読み込み
+        await loadMotivations();
+        setNewMotivationName('');
+        setNewMotivationContent('');
+        setIsMotivationModalOpen(false);
+        alert('意気込みを保存しました！');
+      } else {
+        alert(`保存に失敗しました: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('意気込み保存中にエラー:', error);
+      alert('意気込みの保存中にエラーが発生しました');
+    }
   };
 
   const openMotivationModal = () => {
     setNewMotivationName(profileData.name); // プロフィール名前をデフォルトに設定
+    if (myMotivation) {
+      setNewMotivationContent(myMotivation.content); // 既存の意気込みを設定
+    }
     setIsMotivationModalOpen(true);
   };
 
@@ -894,7 +914,7 @@ export default function DashboardDemoPage() {
               {motivations.length > 0 && (
                 <div key={currentMotivationIndex} className="motivation-fade-in mt-2">
                   <p className="text-emerald-100 text-sm">
-                    {motivations[currentMotivationIndex]?.name}：{motivations[currentMotivationIndex]?.content}
+                    {motivations[currentMotivationIndex]?.user_name}：{motivations[currentMotivationIndex]?.content}
                   </p>
                 </div>
               )}
@@ -1474,24 +1494,18 @@ export default function DashboardDemoPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-3">
                     💪 自分の意気込み
                   </label>
-                  {(() => {
-                    const myMotivation = motivations.find(m => m.isOwn);
-                    if (myMotivation) {
-                      return (
-                        <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 mb-3 text-center">
-                          <p className="text-sm text-gray-700">
-                            {myMotivation.content}
-                          </p>
-                        </div>
-                      );
-                    }
-                    return null;
-                  })()}
+                  {myMotivation && (
+                    <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 mb-3 text-center">
+                      <p className="text-sm text-gray-700">
+                        {myMotivation.content}
+                      </p>
+                    </div>
+                  )}
                   <button 
                     className="w-full py-3 px-4 bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-600 rounded-xl transition-colors text-sm"
                     onClick={openMotivationModal}
                   >
-                    + 意気込みを{motivations.find(m => m.isOwn) ? '変更' : '追加'}する
+                    + 意気込みを{myMotivation ? '変更' : '追加'}する
                   </button>
                 </div>
 
@@ -1593,9 +1607,9 @@ export default function DashboardDemoPage() {
                 </button>
                 <button
                   onClick={handleAddMotivation}
-                  disabled={!newMotivationName.trim() || !newMotivationContent.trim()}
+                  disabled={!newMotivationContent.trim()}
                   className={`flex-1 py-3 px-4 rounded-xl font-semibold transition-all ${
-                    newMotivationName.trim() && newMotivationContent.trim()
+                    newMotivationContent.trim()
                       ? 'bg-blue-500 text-white hover:bg-blue-600'
                       : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                   }`}
