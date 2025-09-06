@@ -6,7 +6,6 @@ const SLACK_CLIENT_SECRET = process.env.SLACK_CLIENT_SECRET
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const code = searchParams.get('code')
-  const state = searchParams.get('state')
   
   if (!code) {
     // 認証URLにリダイレクト
