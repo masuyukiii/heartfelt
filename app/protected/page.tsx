@@ -1029,7 +1029,7 @@ export default function ProtectedPage() {
                 ご褒美ゴール：{rewardGoal.name}
               </h1>
               <p className="text-emerald-100 text-xs mt-1">
-                みんなで「ありがとう」を伝えてゴールを目指そう！
+                みんなで「ありがとう」と「本音」を伝えてゴールを目指そう！
               </p>
               {motivations.length > 0 && (
                 <div key={currentMotivationIndex} className="motivation-fade-in mt-2">
