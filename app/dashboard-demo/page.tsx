@@ -1036,7 +1036,7 @@ export default function DashboardDemoPage() {
             <div className="grid grid-cols-2 gap-4">
               <button 
                 onClick={() => setViewMode('inbox')}
-                className="group w-full bg-white border-2 border-gray-200 text-gray-700 p-4 rounded-2xl hover:border-purple-300 hover:bg-purple-50 transition-all duration-200 hover:scale-105 active:scale-95"
+                className="group w-full bg-white border-2 border-gray-200 text-gray-700 p-3 rounded-xl hover:border-purple-300 hover:bg-purple-50 transition-all duration-200 hover:scale-105 active:scale-95"
               >
                 <div className="text-2xl mb-2 group-hover:scale-110 transition-transform duration-200">📫</div>
                 <div className="text-sm font-semibold">受信<br />BOX</div>
@@ -1047,7 +1047,7 @@ export default function DashboardDemoPage() {
                 )}
               </button>
               
-              <button className="group w-full bg-white border-2 border-gray-200 text-gray-400 p-4 rounded-2xl cursor-not-allowed">
+              <button className="group w-full bg-white border-2 border-gray-200 text-gray-400 p-3 rounded-xl cursor-not-allowed">
                 <div className="text-2xl mb-2">📚</div>
                 <div className="text-sm font-medium">ことば<br />ライブラリ</div>
                 <div className="text-xs text-gray-400 mt-1">準備中</div>
