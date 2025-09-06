@@ -453,13 +453,30 @@ export default function DashboardDemoPage() {
 
   // メッセージから提案文章を抽出する関数
   const extractMessageFromAI = (content: string): string | null => {
-    // 「」で囲まれたメッセージ部分を抽出
+    // 複数行対応の「」（鉤括弧）で囲まれたメッセージ部分を抽出
+    const multiLineQuotedMatch = content.match(/「([\s\S]*?)」/);
+    if (multiLineQuotedMatch) {
+      const extracted = multiLineQuotedMatch[1].trim();
+      if (extracted.length > 10) { // ある程度の長さがある場合のみ
+        return extracted;
+      }
+    }
+    
+    // 単行の「」（鉤括弧）で囲まれたメッセージ部分を抽出
+    const quotedMatch = content.match(/「([^」\n]+)」/);
+    if (quotedMatch) return quotedMatch[1];
+    
+    // 『』で囲まれたメッセージ部分を抽出
     const messageMatch = content.match(/『([^』]+)』/s);
     if (messageMatch) return messageMatch[1];
     
     // ---で囲まれたメッセージ部分を抽出
     const dashMatch = content.match(/---\n([\s\S]+?)\n---/);
     if (dashMatch) return dashMatch[1].trim();
+    
+    // 「こんな感じで伝えてみるのはどうでしょう？」の後の段落を抽出
+    const suggestionMatch = content.match(/こんな感じで伝えてみるのはどうでしょう[？?]\s*\n\s*(.+?)(?:\n\n|$)/s);
+    if (suggestionMatch) return suggestionMatch[1].trim();
     
     return null;
   };
