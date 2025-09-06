@@ -92,6 +92,16 @@ export default function DashboardDemoPage() {
   const [newMotivationContent, setNewMotivationContent] = useState('');
   const [currentMotivationIndex, setCurrentMotivationIndex] = useState(0);
 
+  // 個人ご褒美設定のデータベース（実際にはSupabaseやローカルストレージから取得）
+  const [userRewardSettings, setUserRewardSettings] = useState([
+    { id: 1, userName: '田中さん', title: 'カフェタイム', description: 'お気に入りのカフェで読書', points: 30 },
+    { id: 2, userName: '佐藤さん', title: '美味しいディナー', description: 'おしゃれなレストランで', points: 50 },
+    { id: 3, userName: '鈴木さん', title: 'スパでリラックス', description: 'マッサージで疲れをリセット', points: 70 },
+    { id: 4, userName: '山田さん', title: 'ちょっと豪華なランチ', description: '友達と楽しいひと時', points: 30 },
+    { id: 5, userName: '高橋さん', title: '憧れの場所へ特別な旅行', description: '温泉旅館でゆったりと', points: 100 }
+  ]);
+  const [currentRewardIndex, setCurrentRewardIndex] = useState(0);
+
   // ご褒美ゴール設定
   const [rewardGoal, setRewardGoal] = useState({
     title: 'カフェで読書タイム',
@@ -249,6 +259,23 @@ export default function DashboardDemoPage() {
     return () => clearInterval(interval);
   }, [motivations]);
 
+  // ご褒美設定を5秒ごとにランダムに切り替え
+  useEffect(() => {
+    if (userRewardSettings.length <= 1) return;
+
+    const interval = setInterval(() => {
+      setCurrentRewardIndex(prev => {
+        let newIndex;
+        do {
+          newIndex = Math.floor(Math.random() * userRewardSettings.length);
+        } while (newIndex === prev && userRewardSettings.length > 1);
+        return newIndex;
+      });
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [userRewardSettings]);
+
   const addPoints = (type: 'thanks' | 'honesty') => {
     setMockData(prev => ({
       ...prev,
@@ -351,6 +378,16 @@ export default function DashboardDemoPage() {
 
   const handleSaveGoal = () => {
     if (!editGoalTitle.trim()) return;
+
+    // 個人のご褒美設定をデータベースに保存
+    const userRewardSetting = {
+      id: Date.now(),
+      userName: profileData.name,
+      title: editGoalTitle,
+      description: editGoalDescription,
+      points: editGoalPoints
+    };
+    setUserRewardSettings(prev => [userRewardSetting, ...prev]);
 
     const newGoal = {
       title: editGoalTitle,
@@ -879,9 +916,16 @@ export default function DashboardDemoPage() {
                 <span className="text-2xl">🎯</span>
               </div>
               <h1 className="text-white text-xl font-bold tracking-wide">ご褒美ゴール</h1>
-              <p className="text-emerald-100 text-sm mt-1">{rewardGoal.title}</p>
-              {rewardGoal.description && (
-                <p className="text-emerald-200 text-xs mt-1 opacity-80">{rewardGoal.description}</p>
+              {userRewardSettings.length > 0 && (
+                <div key={currentRewardIndex} className="motivation-fade-in">
+                  <p className="text-emerald-100 text-sm mt-1">{userRewardSettings[currentRewardIndex]?.title}</p>
+                  {userRewardSettings[currentRewardIndex]?.description && (
+                    <p className="text-emerald-200 text-xs mt-1 opacity-80">{userRewardSettings[currentRewardIndex]?.description}</p>
+                  )}
+                  <p className="text-emerald-300 text-xs mt-1 opacity-60">
+                    by {userRewardSettings[currentRewardIndex]?.userName} ({userRewardSettings[currentRewardIndex]?.points}pt)
+                  </p>
+                </div>
               )}
             </div>
           </div>
@@ -1426,25 +1470,9 @@ export default function DashboardDemoPage() {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-3">
                     💪 みんなの意気込み
-                    <span className="text-xs text-gray-500 ml-2">（目標達成に向けた応援メッセージ）</span>
                   </label>
-                  <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 h-24 overflow-hidden relative flex items-center justify-center">
-                    {motivations.length > 0 && (
-                      <div 
-                        className="text-sm text-gray-700 text-center motivation-fade-in" 
-                        key={currentMotivationIndex}
-                      >
-                        <div className="font-medium text-blue-600 mb-1">
-                          {motivations[currentMotivationIndex]?.name}
-                        </div>
-                        <div className="text-gray-800">
-                          "{motivations[currentMotivationIndex]?.content}"
-                        </div>
-                      </div>
-                    )}
-                  </div>
                   <button 
-                    className="mt-2 text-xs text-blue-600 hover:text-blue-800 underline"
+                    className="w-full py-3 px-4 bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-600 rounded-xl transition-colors text-sm"
                     onClick={openMotivationModal}
                   >
                     + 意気込みを追加する
