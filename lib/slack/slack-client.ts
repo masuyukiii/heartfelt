@@ -18,56 +18,56 @@ export class SlackService {
       const messageTypeEmoji = params.messageType === 'thanks' ? '✨' : '💬'
       const messageTypeText = params.messageType === 'thanks' ? '感謝のメッセージ' : '本音メッセージ'
       
-      const message = {
-        text: `🎯 Heartfeltから通知`,
-        blocks: [
-          {
-            type: "header",
-            text: {
-              type: "plain_text",
-              text: "🎯 Heartfelt - 新しいメッセージ",
-              emoji: true
-            }
-          },
-          {
-            type: "section",
-            fields: [
-              {
-                type: "mrkdwn",
-                text: `*送信者:* ${params.senderName}`
-              },
-              {
-                type: "mrkdwn",
-                text: `*種類:* ${messageTypeText} ${messageTypeEmoji}`
-              }
-            ]
-          },
-          {
-            type: "section",
-            text: {
-              type: "mrkdwn",
-              text: `*メッセージ内容:*\n> ${params.content}`
-            }
+      const baseBlocks = [
+        {
+          type: "header",
+          text: {
+            type: "plain_text",
+            text: "🎯 Heartfelt - 新しいメッセージ",
+            emoji: true
           }
-        ]
-      }
-
-      if (params.appUrl) {
-        message.blocks.push({
-          type: "actions",
-          elements: [
+        },
+        {
+          type: "section",
+          fields: [
             {
-              type: "button",
-              text: {
-                type: "plain_text",
-                text: "📱 アプリで確認",
-                emoji: true
-              },
-              url: params.appUrl,
-              style: "primary"
+              type: "mrkdwn",
+              text: `*送信者:* ${params.senderName}`
+            },
+            {
+              type: "mrkdwn",
+              text: `*種類:* ${messageTypeText} ${messageTypeEmoji}`
             }
           ]
-        })
+        },
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: `*メッセージ内容:*\n> ${params.content}`
+          }
+        }
+      ]
+
+      const actionBlock = params.appUrl ? {
+        type: "actions",
+        elements: [
+          {
+            type: "button",
+            text: {
+              type: "plain_text",
+              text: "📱 アプリで確認",
+              emoji: true
+            },
+            url: params.appUrl,
+            style: "primary"
+          }
+        ]
+      } : null
+
+      const message = {
+        text: `🎯 Heartfeltから通知`,
+        blocks: actionBlock ? [...baseBlocks, actionBlock] : baseBlocks
       }
 
       const response = await fetch(webhookUrl, {
