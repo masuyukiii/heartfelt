@@ -281,23 +281,29 @@ export default function ProtectedPage() {
   };
 
   const handleDeleteMessage = async (messageId: string) => {
+    console.log('🗑️ Attempting to delete message:', messageId);
+    
     if (!confirm('このメッセージを削除しますか？この操作は取り消すことができません。')) {
+      console.log('❌ Delete cancelled by user');
       return;
     }
 
     try {
+      console.log('📡 Calling deleteMessage API...');
       const result = await deleteMessage(messageId);
+      console.log('📦 Delete result:', result);
       
       if (result.success) {
+        console.log('✅ Message deleted successfully, reloading messages...');
         // メッセージリストを再読み込み
         await loadMessages();
         alert('メッセージを削除しました');
       } else {
-        console.error('Failed to delete message:', result.error);
+        console.error('❌ Failed to delete message:', result.error);
         alert(`メッセージの削除に失敗しました: ${result.error}`);
       }
     } catch (error) {
-      console.error('Delete message error:', error);
+      console.error('💥 Delete message error:', error);
       alert('メッセージ削除中にエラーが発生しました');
     }
   };
