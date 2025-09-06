@@ -1022,15 +1022,15 @@ export default function ProtectedPage() {
               </button>
             </div>
             <div className="relative z-10">
+              <p className="text-emerald-100 text-xs mb-2">
+                みんなで「ありがとう」と「本音」を伝えてゴールを目指そう！
+              </p>
               <div className="inline-flex items-center justify-center w-8 h-8 bg-white/20 rounded-full mb-1">
                 <span className="text-lg">🎯</span>
               </div>
               <h1 className="text-white text-lg font-bold tracking-wide">
                 ご褒美ゴール：{rewardGoal.name}
               </h1>
-              <p className="text-emerald-100 text-xs mt-1">
-                みんなで「ありがとう」と「本音」を伝えてゴールを目指そう！
-              </p>
               {motivations.length > 0 && (
                 <div key={currentMotivationIndex} className="motivation-fade-in mt-2">
                   <p className="text-emerald-100 text-sm">
