@@ -887,8 +887,12 @@ export default function DashboardDemoPage() {
               <h1 className="text-white text-xl font-bold tracking-wide">
                 ご褒美ゴール：{rewardGoal.title}
               </h1>
-              {rewardGoal.description && (
-                <p className="text-emerald-200 text-xs mt-1 opacity-80">{rewardGoal.description}</p>
+              {motivations.length > 0 && (
+                <div key={currentMotivationIndex} className="motivation-fade-in mt-2">
+                  <p className="text-emerald-100 text-sm">
+                    {motivations[currentMotivationIndex]?.name}：{motivations[currentMotivationIndex]?.content}
+                  </p>
+                </div>
               )}
             </div>
           </div>
@@ -1434,16 +1438,6 @@ export default function DashboardDemoPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-3">
                     💪 みんなの意気込み
                   </label>
-                  {motivations.length > 0 && (
-                    <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 mb-3 text-center">
-                      <div key={currentMotivationIndex} className="motivation-fade-in">
-                        <p className="text-sm text-gray-700">
-                          <span className="font-medium text-blue-600">{motivations[currentMotivationIndex]?.name}</span>
-                          ：{motivations[currentMotivationIndex]?.content}
-                        </p>
-                      </div>
-                    </div>
-                  )}
                   <button 
                     className="w-full py-3 px-4 bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-600 rounded-xl transition-colors text-sm"
                     onClick={openMotivationModal}
