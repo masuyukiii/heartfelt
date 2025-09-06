@@ -989,26 +989,26 @@ export default function DashboardDemoPage() {
                 <div className="text-5xl mb-3 filter drop-shadow-lg animate-pulse">
                   {getGrowthStageIcon(totalPoints, rewardGoal.requiredPoints)}
                 </div>
-                <div className="mt-2 inline-flex items-center bg-white/60 backdrop-blur-sm px-3 py-1 rounded-full mb-2">
-                  <span className="text-xs text-gray-600">現在 {totalPoints} ポイント</span>
-                </div>
-                <p className="text-emerald-700 font-medium text-xs whitespace-pre-line">
+                <p className="text-emerald-700 font-medium text-xs whitespace-pre-line mb-2">
                   {getGrowthMessage(totalPoints, rewardGoal.requiredPoints)}
                 </p>
-              </div>
-            </div>
-
-            {/* ポイント詳細（コンパクト版） */}
-            <div className="grid grid-cols-2 gap-3 mb-4">
-              <div className="bg-gradient-to-br from-pink-50 to-rose-50 rounded-lg p-3 text-center border border-pink-100">
-                <div className="text-lg mb-1">💖</div>
-                <div className="text-lg font-bold text-pink-600">{mockData.thanksPoints}</div>
-                <div className="text-xs text-pink-700">ありがとう</div>
-              </div>
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-3 text-center border border-blue-100">
-                <div className="text-lg mb-1">💭</div>
-                <div className="text-lg font-bold text-blue-600">{mockData.honestyPoints}</div>
-                <div className="text-xs text-blue-700">本音</div>
+                <div className="inline-flex items-center bg-white/60 backdrop-blur-sm px-3 py-1 rounded-full mb-3">
+                  <span className="text-xs text-gray-600">現在 {totalPoints} ポイント</span>
+                </div>
+                
+                {/* ポイント詳細（植物エリア内に統合） */}
+                <div className="grid grid-cols-2 gap-3 mt-3">
+                  <div className="bg-white/40 backdrop-blur-sm rounded-lg p-2 text-center border border-pink-200/50">
+                    <div className="text-sm mb-1">💖</div>
+                    <div className="text-sm font-bold text-pink-600">{mockData.thanksPoints}</div>
+                    <div className="text-xs text-pink-700">ありがとう</div>
+                  </div>
+                  <div className="bg-white/40 backdrop-blur-sm rounded-lg p-2 text-center border border-blue-200/50">
+                    <div className="text-sm mb-1">💭</div>
+                    <div className="text-sm font-bold text-blue-600">{mockData.honestyPoints}</div>
+                    <div className="text-xs text-blue-700">本音</div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
