@@ -83,9 +83,11 @@ export default function DashboardDemoPage() {
 
   // 意気込み機能の状態
   const [motivations, setMotivations] = useState([
-    { id: 1, name: '田中さん', content: '今月こそは自分にご褒美をあげるぞ！', timestamp: new Date() },
-    { id: 2, name: '佐藤さん', content: 'みんなで目標達成頑張ろう✨', timestamp: new Date() },
-    { id: 3, name: '鈴木さん', content: '小さな積み重ねが大きな成果に🌸', timestamp: new Date() }
+    { id: 1, name: '田中', content: '美味しいランチが食べたーい！', timestamp: new Date() },
+    { id: 2, name: '佐藤', content: '今度こそスパでリラックスしたい', timestamp: new Date() },
+    { id: 3, name: '鈴木', content: '憧れの温泉旅館に泊まってみたい！', timestamp: new Date() },
+    { id: 4, name: '山田', content: 'おしゃれなカフェでまったりしたい', timestamp: new Date() },
+    { id: 5, name: '高橋', content: '友達と豪華ディナーを楽しみたい', timestamp: new Date() }
   ]);
   const [isMotivationModalOpen, setIsMotivationModalOpen] = useState(false);
   const [newMotivationName, setNewMotivationName] = useState('');
@@ -915,10 +917,11 @@ export default function DashboardDemoPage() {
               <div className="inline-flex items-center justify-center w-12 h-12 bg-white/20 rounded-full mb-3">
                 <span className="text-2xl">🎯</span>
               </div>
-              <h1 className="text-white text-xl font-bold tracking-wide">ご褒美ゴール</h1>
               {userRewardSettings.length > 0 && (
                 <div key={currentRewardIndex} className="motivation-fade-in">
-                  <p className="text-emerald-100 text-sm mt-1">{userRewardSettings[currentRewardIndex]?.title}</p>
+                  <h1 className="text-white text-xl font-bold tracking-wide">
+                    ご褒美ゴール：{userRewardSettings[currentRewardIndex]?.title}
+                  </h1>
                   {userRewardSettings[currentRewardIndex]?.description && (
                     <p className="text-emerald-200 text-xs mt-1 opacity-80">{userRewardSettings[currentRewardIndex]?.description}</p>
                   )}
@@ -1471,6 +1474,16 @@ export default function DashboardDemoPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-3">
                     💪 みんなの意気込み
                   </label>
+                  {motivations.length > 0 && (
+                    <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 mb-3 text-center">
+                      <div key={currentMotivationIndex} className="motivation-fade-in">
+                        <p className="text-sm text-gray-700">
+                          <span className="font-medium text-blue-600">{motivations[currentMotivationIndex]?.name}</span>
+                          ：{motivations[currentMotivationIndex]?.content}
+                        </p>
+                      </div>
+                    </div>
+                  )}
                   <button 
                     className="w-full py-3 px-4 bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-600 rounded-xl transition-colors text-sm"
                     onClick={openMotivationModal}
