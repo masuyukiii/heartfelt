@@ -62,6 +62,17 @@ export default function ProtectedPage() {
   const [isAIProcessing, setIsAIProcessing] = useState(false);
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
   
+  // 感謝キーワードタグ
+  const [currentKeywords, setCurrentKeywords] = useState<string[]>([]);
+  const thanksKeywords = [
+    '的確なアドバイス', '神対応', 'さりげない優しさ', '学びになった', 
+    '勇気をもらえた', '最高のチームプレイ', '尊敬しています', '視野が広がった',
+    'おかげで乗り越えられた', 'すごいと思った', '助かりました', '感動しました',
+    'いつもありがとう', '心強かった', '成長できました', '励みになりました',
+    '新しい発見', '頼りになります', '素晴らしい提案', '丁寧な対応',
+    'フォローありがとう', '気づきをもらえた', 'プロフェッショナル', '配慮に感謝'
+  ];
+  
   // 受信BOX用の状態
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
@@ -346,6 +357,18 @@ export default function ProtectedPage() {
     return () => clearInterval(interval);
   }, [motivations]);
 
+  // キーワードタグを3秒ごとに更新
+  useEffect(() => {
+    if (!showThanksModal) return;
+    
+    const interval = setInterval(() => {
+      const shuffled = [...thanksKeywords].sort(() => Math.random() - 0.5);
+      setCurrentKeywords(shuffled.slice(0, 5));
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [showThanksModal]);
+
   // const refreshTeamPoints = async () => {
   //   await loadTeamPoints();
   //   
@@ -386,6 +409,9 @@ export default function ProtectedPage() {
     setMessage('');
     // モーダルを開くたびにユーザーリストを更新
     loadUsers();
+    // ランダムに5つのキーワードを選択
+    const shuffled = [...thanksKeywords].sort(() => Math.random() - 0.5);
+    setCurrentKeywords(shuffled.slice(0, 5));
   };
 
   const openHonestyModal = () => {
@@ -1229,6 +1255,33 @@ export default function ProtectedPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-3">
                     メッセージ <span className="text-gray-500">({message.length}/200文字)</span>
                   </label>
+                  
+                  {/* キーワードタグ */}
+                  <div className="mb-2">
+                    <style jsx>{`
+                      @keyframes fadeInOut {
+                        0% { opacity: 0; transform: translateY(-5px); }
+                        20% { opacity: 1; transform: translateY(0); }
+                        80% { opacity: 1; transform: translateY(0); }
+                        100% { opacity: 0; transform: translateY(5px); }
+                      }
+                      .keyword-tag {
+                        animation: fadeInOut 3s ease-in-out;
+                      }
+                    `}</style>
+                    <div className="flex flex-wrap gap-1.5" key={currentKeywords.join(',')}>
+                      {currentKeywords.map((keyword, index) => (
+                        <span
+                          key={`${keyword}-${index}`}
+                          className="keyword-tag inline-block px-2 py-0.5 text-xs text-pink-600 bg-pink-50 border border-pink-200 rounded-full"
+                          style={{ animationDelay: `${index * 0.1}s` }}
+                        >
+                          {keyword}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  
                   <textarea
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
