@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { createClient } from "@/lib/supabase/client";
 import { getUsers, type User } from '@/lib/supabase/users';
 import { getReceivedMessages, markAsRead, sendMessage, deleteMessage, type Message } from '@/lib/supabase/message-actions';
@@ -66,7 +66,7 @@ export default function ProtectedPage() {
   // 感謝キーワードタグ
   const [currentKeywords, setCurrentKeywords] = useState<string[]>([]);
   const [isKeywordChanging, setIsKeywordChanging] = useState(false);
-  const thanksKeywords = [
+  const thanksKeywords = useMemo(() => [
     '的確なアドバイス', '神対応', 'さりげない優しさ', '学びになった', 
     '勇気をもらえた', '最高のチームプレイ', '尊敬しています', '視野が広がった',
     'おかげで乗り越えられた', 'すごいと思った', '助かりました', '感動しました',
@@ -87,7 +87,7 @@ export default function ProtectedPage() {
     'スピード感がすごい', '効率的でした', '無駄がない', 'スマートな対応',
     'チャレンジ精神に感服', '行動力に脱帽', '決断力がすごい', 'リーダーシップを感じた',
     '包容力がある', '懐が深い', '器が大きい', '人間力を感じた'
-  ];
+  ], []);
   
   // 受信BOX用の状態
   const [messages, setMessages] = useState<Message[]>([]);
@@ -388,7 +388,7 @@ export default function ProtectedPage() {
     }, 10000);
 
     return () => clearInterval(interval);
-  }, [showThanksModal]);
+  }, [showThanksModal, thanksKeywords]);
 
   // const refreshTeamPoints = async () => {
   //   await loadTeamPoints();

@@ -4,42 +4,7 @@ import { useState, useEffect } from 'react';
 import { createClient } from "@/lib/supabase/client";
 import { getLibraryWords, removeFromLibrary, getLibraryStats, type WordLibraryEntry } from '@/lib/supabase/word-library-actions';
 
-function getCloudStyle(index: number, total: number) {
-  const patterns = [
-    () => ({
-      left: `${Math.random() * 70 + 10}%`,
-      top: `${Math.random() * 60 + 15}%`,
-      transform: `rotate(${Math.random() * 20 - 10}deg)`,
-    }),
-    () => {
-      const angle = (index / total) * Math.PI * 2;
-      const radius = 25;
-      const centerX = 50;
-      const centerY = 40;
-      return {
-        left: `${centerX + Math.cos(angle) * radius}%`,
-        top: `${centerY + Math.sin(angle) * radius}%`,
-        transform: `rotate(${Math.sin(angle) * 15}deg)`,
-      };
-    },
-    () => ({
-      left: `${(index / total) * 80 + 10}%`,
-      top: `${Math.sin((index / total) * Math.PI * 3) * 20 + 40}%`,
-      transform: `rotate(${Math.sin(index) * 10}deg)`,
-    }),
-  ];
 
-  const pattern = patterns[total % patterns.length];
-  return pattern();
-}
-
-function getCloudSize(content: string) {
-  const length = content.length;
-  if (length < 20) return 'text-sm px-3 py-2';
-  if (length < 40) return 'text-base px-4 py-3';
-  if (length < 80) return 'text-lg px-5 py-4';
-  return 'text-xl px-6 py-5';
-}
 
 export default function LibraryPage() {
   const [, setUser] = useState<{ id: string; email?: string } | null>(null);
@@ -114,19 +79,6 @@ export default function LibraryPage() {
     }
   };
 
-  const formatTimeAgo = (date: Date) => {
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / (1000 * 60));
-    const diffHours = Math.floor(diffMins / 60);
-    const diffDays = Math.floor(diffHours / 24);
-
-    if (diffMins < 1) return '今';
-    if (diffMins < 60) return `${diffMins}分前`;
-    if (diffHours < 24) return `${diffHours}時間前`;
-    if (diffDays < 7) return `${diffDays}日前`;
-    return date.toLocaleDateString('ja-JP');
-  };
 
   // フィルタリングされた言葉
   const filteredWords = words.filter(word => {

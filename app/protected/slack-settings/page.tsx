@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { getSlackSettings, updateSlackSettings, type SlackSettings } from '@/lib/supabase/slack-actions';
 
 export default function SlackSettingsPage() {
-  const [settings, setSettings] = useState<SlackSettings | null>(null);
+  const [, setSettings] = useState<SlackSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [webhookUrl, setWebhookUrl] = useState('');
@@ -58,7 +58,7 @@ export default function SlackSettingsPage() {
       } else {
         setMessage({ type: 'error', text: result.error || '保存に失敗しました' });
       }
-    } catch (error) {
+    } catch {
       setMessage({ type: 'error', text: '保存中にエラーが発生しました' });
     } finally {
       setSaving(false);
