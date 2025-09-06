@@ -13,13 +13,13 @@ import { getAIFeedback, type ChatMessage } from '@/lib/claude/ai-assistant';
 
 // 6段階成長システム関数（目標割合ベース）
 function getGrowthStageIcon(totalPoints: number, targetPoints: number) {
-  if (totalPoints === 0) return '/images/growth-stages/seed.png'; // タネ
+  if (totalPoints === 0) return { path: '/images/growth-stages/seed.png', size: 'w-48' }; // タネ（小さめ）
   const percentage = (totalPoints / targetPoints) * 100;
-  if (percentage <= 10) return '/images/growth-stages/sprout.gif'; // 芽
-  if (percentage <= 30) return '/images/growth-stages/young-leaves.gif'; // 若葉
-  if (percentage <= 60) return '/images/growth-stages/small-tree.gif'; // 小木
-  if (percentage <= 90) return '/images/growth-stages/tree.gif'; // 木
-  return '/images/growth-stages/flower.gif'; // 花
+  if (percentage <= 10) return { path: '/images/growth-stages/sprout.gif', size: 'w-64' }; // 芽
+  if (percentage <= 30) return { path: '/images/growth-stages/young-leaves.gif', size: 'w-64' }; // 若葉
+  if (percentage <= 60) return { path: '/images/growth-stages/small-tree.gif', size: 'w-64' }; // 小木
+  if (percentage <= 90) return { path: '/images/growth-stages/tree.gif', size: 'w-64' }; // 木
+  return { path: '/images/growth-stages/flower.gif', size: 'w-64' }; // 花
 }
 
 function getGrowthMessage(totalPoints: number, targetPoints: number) {
@@ -1077,8 +1077,19 @@ export default function ProtectedPage() {
               <div className="relative z-10 text-center">
                 <div className="filter drop-shadow-lg">
                   {(() => {
-                    const iconPath = getGrowthStageIcon(totalPoints, rewardGoal.requiredPoints);
-                    // 画像パスの場合はimgタグ、絵文字の場合はそのまま表示
+                    const iconData = getGrowthStageIcon(totalPoints, rewardGoal.requiredPoints);
+                    // オブジェクトの場合は新形式、文字列の場合は旧形式（互換性のため）
+                    if (typeof iconData === 'object' && iconData.path) {
+                      return (
+                        <img 
+                          src={iconData.path} 
+                          alt="成長ステージ" 
+                          className={`${iconData.size} h-auto mx-auto object-contain`}
+                        />
+                      );
+                    }
+                    // 旧形式のサポート（念のため）
+                    const iconPath = typeof iconData === 'string' ? iconData : '';
                     if (iconPath.startsWith('/')) {
                       return (
                         <img 
