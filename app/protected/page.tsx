@@ -1264,11 +1264,18 @@ export default function ProtectedPage() {
                     <select
                       value={selectedRecipient}
                       onChange={(e) => setSelectedRecipient(e.target.value)}
-                      className={`w-full p-3 rounded-xl border-2 transition-all duration-200 ${
+                      className={`w-full p-3 rounded-xl border-2 transition-all duration-200 font-medium text-gray-900 ${
                         selectedRecipient
                           ? 'border-pink-500 bg-pink-50'
-                          : 'border-gray-200 hover:border-gray-300'
-                      } focus:outline-none focus:border-pink-500`}
+                          : 'border-gray-200 hover:border-gray-300 bg-white'
+                      } focus:outline-none focus:border-pink-500 appearance-none cursor-pointer`}
+                      style={{
+                        backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+                        backgroundPosition: 'right 0.5rem center',
+                        backgroundRepeat: 'no-repeat',
+                        backgroundSize: '1.5em 1.5em',
+                        paddingRight: '2.5rem'
+                      }}
                     >
                       <option value="">宛先を選択...</option>
                       {(users.length > 0 ? users : mockRecipients).map((recipient) => (
@@ -1368,11 +1375,18 @@ export default function ProtectedPage() {
                     <select
                       value={selectedRecipient}
                       onChange={(e) => setSelectedRecipient(e.target.value)}
-                      className={`w-full p-3 rounded-xl border-2 transition-all duration-200 ${
+                      className={`w-full p-3 rounded-xl border-2 transition-all duration-200 font-medium text-gray-900 ${
                         selectedRecipient
                           ? 'border-blue-500 bg-blue-50'
-                          : 'border-gray-200 hover:border-gray-300'
-                      } focus:outline-none focus:border-blue-500`}
+                          : 'border-gray-200 hover:border-gray-300 bg-white'
+                      } focus:outline-none focus:border-blue-500 appearance-none cursor-pointer`}
+                      style={{
+                        backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+                        backgroundPosition: 'right 0.5rem center',
+                        backgroundRepeat: 'no-repeat',
+                        backgroundSize: '1.5em 1.5em',
+                        paddingRight: '2.5rem'
+                      }}
                     >
                       <option value="">宛先を選択...</option>
                       {(users.length > 0 ? users : mockRecipients).map((recipient) => (
