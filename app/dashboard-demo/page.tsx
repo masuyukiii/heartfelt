@@ -453,6 +453,15 @@ export default function DashboardDemoPage() {
 
   // メッセージから提案文章を抽出する関数
   const extractMessageFromAI = (content: string): string | null => {
+    // ==========で囲まれたメッセージ部分を抽出（最優先）
+    const equalMatch = content.match(/==========\s*([\s\S]*?)\s*==========/);
+    if (equalMatch) {
+      const extracted = equalMatch[1].trim();
+      if (extracted.length > 5) { // ある程度の長さがある場合のみ
+        return extracted;
+      }
+    }
+    
     // 複数行対応の「」（鉤括弧）で囲まれたメッセージ部分を抽出
     const multiLineQuotedMatch = content.match(/「([\s\S]*?)」/);
     if (multiLineQuotedMatch) {
