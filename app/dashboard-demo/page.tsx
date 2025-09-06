@@ -77,7 +77,7 @@ export default function DashboardDemoPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const [messageError, setMessageError] = useState<string | null>(null);
-  const [messageFilter, setMessageFilter] = useState<'all' | 'thanks' | 'honesty'>('all');
+  const [messageFilter, setMessageFilter] = useState<'unread' | 'all' | 'thanks' | 'honesty'>('all');
 
   // ご褒美ゴール設定
   const [rewardGoal, setRewardGoal] = useState({
@@ -540,6 +540,7 @@ export default function DashboardDemoPage() {
     // フィルタリングされたメッセージ
     const filteredMessages = messages.filter(message => {
       if (messageFilter === 'all') return true;
+      if (messageFilter === 'unread') return !message.is_read;
       return message.type === messageFilter;
     });
 
@@ -577,6 +578,50 @@ export default function DashboardDemoPage() {
             </button>
           </div>
 
+          {/* フィルタータブ */}
+          <div className="flex bg-white rounded-lg p-1 shadow-sm">
+            <button
+              onClick={() => setMessageFilter('unread')}
+              className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                messageFilter === 'unread'
+                  ? 'bg-red-500 text-white'
+                  : 'text-gray-600 hover:text-gray-800'
+              }`}
+            >
+              🔴 未読 ({unreadCount})
+            </button>
+            <button
+              onClick={() => setMessageFilter('all')}
+              className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                messageFilter === 'all'
+                  ? 'bg-purple-500 text-white'
+                  : 'text-gray-600 hover:text-gray-800'
+              }`}
+            >
+              すべて ({messages.length})
+            </button>
+            <button
+              onClick={() => setMessageFilter('thanks')}
+              className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                messageFilter === 'thanks'
+                  ? 'bg-green-500 text-white'
+                  : 'text-gray-600 hover:text-gray-800'
+              }`}
+            >
+              💚 ありがとう ({thanksCount})
+            </button>
+            <button
+              onClick={() => setMessageFilter('honesty')}
+              className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                messageFilter === 'honesty'
+                  ? 'bg-blue-500 text-white'
+                  : 'text-gray-600 hover:text-gray-800'
+              }`}
+            >
+              💭 本音 ({honestyCount})
+            </button>
+          </div>
+
           {/* エラー表示 */}
           {messageError && (
             <div className="bg-red-100 border-l-4 border-red-500 p-4">
@@ -601,11 +646,13 @@ export default function DashboardDemoPage() {
               <div className="text-4xl mb-4">📭</div>
               <p className="text-gray-600">
                 {messageFilter === 'all' ? 'まだメッセージがありません' : 
+                 messageFilter === 'unread' ? '未読メッセージがありません' :
                  messageFilter === 'thanks' ? 'ありがとうメッセージがありません' : 
                  '本音メッセージがありません'}
               </p>
               <p className="text-gray-500 text-sm mt-2">
                 {messageFilter === 'all' ? 'メッセージを送信してみてください' : 
+                 messageFilter === 'unread' ? '新しいメッセージが届くのをお待ちください' :
                  'フィルターを変更して他のメッセージを確認してください'}
               </p>
             </div>
@@ -686,40 +733,6 @@ export default function DashboardDemoPage() {
                 <div className="font-bold text-blue-600">{honestyCount}件</div>
               </div>
             </div>
-          </div>
-
-          {/* フィルタータブ */}
-          <div className="flex bg-white rounded-lg p-1 shadow-sm">
-            <button
-              onClick={() => setMessageFilter('all')}
-              className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                messageFilter === 'all'
-                  ? 'bg-purple-500 text-white'
-                  : 'text-gray-600 hover:text-gray-800'
-              }`}
-            >
-              すべて ({messages.length})
-            </button>
-            <button
-              onClick={() => setMessageFilter('thanks')}
-              className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                messageFilter === 'thanks'
-                  ? 'bg-green-500 text-white'
-                  : 'text-gray-600 hover:text-gray-800'
-              }`}
-            >
-              💚 ありがとう ({thanksCount})
-            </button>
-            <button
-              onClick={() => setMessageFilter('honesty')}
-              className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                messageFilter === 'honesty'
-                  ? 'bg-blue-500 text-white'
-                  : 'text-gray-600 hover:text-gray-800'
-              }`}
-            >
-              💭 本音 ({honestyCount})
-            </button>
           </div>
 
           {/* リフレッシュボタン */}
