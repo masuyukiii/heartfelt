@@ -13,13 +13,13 @@ import { getAIFeedback, type ChatMessage } from '@/lib/claude/ai-assistant';
 
 // 6段階成長システム関数（目標割合ベース）
 function getGrowthStageIcon(totalPoints: number, targetPoints: number) {
-  if (totalPoints === 0) return { path: '/images/growth-stages/seed.png', size: 'w-48' }; // タネ（小さめ）
+  if (totalPoints === 0) return { path: '/images/growth-stages/seed.png', size: 'w-32' }; // タネ（128px）
   const percentage = (totalPoints / targetPoints) * 100;
-  if (percentage <= 10) return { path: '/images/growth-stages/sprout.gif', size: 'w-56' }; // 芽
-  if (percentage <= 30) return { path: '/images/growth-stages/young-leaves.gif', size: 'w-56' }; // 若葉
-  if (percentage <= 60) return { path: '/images/growth-stages/small-tree.gif', size: 'w-56' }; // 小木
-  if (percentage <= 90) return { path: '/images/growth-stages/tree.gif', size: 'w-56' }; // 木
-  return { path: '/images/growth-stages/flower.gif', size: 'w-56' }; // 花
+  if (percentage <= 10) return { path: '/images/growth-stages/sprout.gif', size: 'w-40' }; // 芽（160px）
+  if (percentage <= 30) return { path: '/images/growth-stages/young-leaves.gif', size: 'w-40' }; // 若葉（160px）
+  if (percentage <= 60) return { path: '/images/growth-stages/small-tree.gif', size: 'w-40' }; // 小木（160px）
+  if (percentage <= 90) return { path: '/images/growth-stages/tree.gif', size: 'w-40' }; // 木（160px）
+  return { path: '/images/growth-stages/flower.gif', size: 'w-40' }; // 花（160px）
 }
 
 function getGrowthMessage(totalPoints: number, targetPoints: number) {
