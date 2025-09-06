@@ -87,6 +87,7 @@ export default function DashboardDemoPage() {
     name: string;
     content: string;
     timestamp: Date;
+    isOwn?: boolean; // 自分の意気込みかどうかのフラグ
   }>>([]);
   const [isMotivationModalOpen, setIsMotivationModalOpen] = useState(false);
   const [newMotivationName, setNewMotivationName] = useState('');
@@ -401,14 +402,18 @@ export default function DashboardDemoPage() {
       return;
     }
 
+    // 既存の自分の意気込みを削除
+    const filteredMotivations = motivations.filter(m => !m.isOwn);
+    
     const newMotivation = {
       id: Date.now(),
       name: newMotivationName,
       content: newMotivationContent,
-      timestamp: new Date()
+      timestamp: new Date(),
+      isOwn: true // 自分の意気込みとしてマーク
     };
 
-    setMotivations(prev => [newMotivation, ...prev]);
+    setMotivations([...filteredMotivations, newMotivation]);
     setNewMotivationName('');
     setNewMotivationContent('');
     setIsMotivationModalOpen(false);
@@ -886,17 +891,21 @@ export default function DashboardDemoPage() {
               <h1 className="text-white text-xl font-bold tracking-wide">
                 ご褒美ゴール：{rewardGoal.title}
               </h1>
-              {motivations.length > 0 ? (
-                <div key={currentMotivationIndex} className="motivation-fade-in mt-2">
-                  <p className="text-emerald-100 text-sm">
-                    {motivations[currentMotivationIndex]?.name}：{motivations[currentMotivationIndex]?.content}
-                  </p>
-                </div>
-              ) : (
-                <p className="text-emerald-200 text-xs mt-1 opacity-80">
-                  みんなの意気込みを追加してください
-                </p>
-              )}
+              {(() => {
+                // 他の人の意気込みだけをフィルタリング
+                const othersMotivations = motivations.filter(m => !m.isOwn);
+                if (othersMotivations.length > 0) {
+                  const currentOtherIndex = currentMotivationIndex % othersMotivations.length;
+                  return (
+                    <div key={currentMotivationIndex} className="motivation-fade-in mt-2">
+                      <p className="text-emerald-100 text-sm">
+                        {othersMotivations[currentOtherIndex]?.name}：{othersMotivations[currentOtherIndex]?.content}
+                      </p>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
             </div>
           </div>
 
@@ -1436,19 +1445,6 @@ export default function DashboardDemoPage() {
                   <div className="text-xs text-gray-500 mt-1">{editGoalTitle.length}/50文字</div>
                 </div>
 
-                {/* みんなの意気込み */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3">
-                    💪 みんなの意気込み
-                  </label>
-                  <button 
-                    className="w-full py-3 px-4 bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-600 rounded-xl transition-colors text-sm"
-                    onClick={openMotivationModal}
-                  >
-                    + 意気込みを追加する
-                  </button>
-                </div>
-
                 {/* 必要ポイント数 */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-3">必要ポイント数</label>
@@ -1479,6 +1475,32 @@ export default function DashboardDemoPage() {
                       ℹ️ 必要ポイント数のみ変更は進捗をリセットしません
                     </div>
                   )}
+                </div>
+
+                {/* 自分の意気込み */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                    💪 自分の意気込み
+                  </label>
+                  {(() => {
+                    const myMotivation = motivations.find(m => m.isOwn);
+                    if (myMotivation) {
+                      return (
+                        <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 mb-3 text-center">
+                          <p className="text-sm text-gray-700">
+                            {myMotivation.content}
+                          </p>
+                        </div>
+                      );
+                    }
+                    return null;
+                  })()}
+                  <button 
+                    className="w-full py-3 px-4 bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-600 rounded-xl transition-colors text-sm"
+                    onClick={openMotivationModal}
+                  >
+                    + 意気込みを{motivations.find(m => m.isOwn) ? '変更' : '追加'}する
+                  </button>
                 </div>
 
                 {/* プリセットボタン */}
@@ -1556,7 +1578,7 @@ export default function DashboardDemoPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    意気込み・応援メッセージ
+                    意気込み
                   </label>
                   <textarea
                     value={newMotivationContent}
