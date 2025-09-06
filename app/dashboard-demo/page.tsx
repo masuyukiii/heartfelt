@@ -26,7 +26,7 @@ function getGrowthMessage(totalPoints: number, targetPoints: number) {
   if (percentage <= 30) return '順調に成長しています';
   if (percentage <= 60) return '立派に育っています';
   if (percentage <= 90) return 'もうすぐ目標達成です';
-  return '目標達成！美しく花が咲きました';
+  return '美しく花が咲きました！目標達成まであとちょっと！';
 }
 
 // 自動返信メッセージを生成する関数
