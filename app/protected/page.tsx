@@ -29,7 +29,7 @@ function getGrowthMessage(totalPoints: number, targetPoints: number) {
   if (percentage <= 30) return '順調に成長しています';
   if (percentage <= 60) return '立派に育っています';
   if (percentage <= 90) return 'もうすぐ目標達成です';
-  return '美しく花が咲きました！\n目標達成まであとちょっと！';
+  return '美しく花が咲きました！';
 }
 
 
