@@ -1411,7 +1411,7 @@ export default function DashboardDemoPage() {
                       { title: 'ちょっと豪華なランチ', desc: '美味しいランチでリフレッシュ', points: 30 },
                       { title: '美味しいディナー', desc: '行きたかったレストランで', points: 50 },
                       { title: 'スパでリラックス', desc: 'マッサージで疲れをリセット', points: 70 },
-                      { title: '豪華旅行', desc: '憧れの場所へ特別な旅', points: 100 }
+                      { title: '憧れの場所へ特別な旅行', desc: '憧れの場所へ特別な旅', points: 100 }
                     ].map((preset, index) => (
                       <button
                         key={index}
