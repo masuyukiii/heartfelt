@@ -13,15 +13,18 @@ CREATE TABLE IF NOT EXISTS profiles (
 -- Row Level Security (RLS) を有効化
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 
--- ポリシーを作成
+-- ポリシーを作成（既存の場合は先に削除）
+DROP POLICY IF EXISTS "Public profiles are viewable by everyone." ON profiles;
 CREATE POLICY "Public profiles are viewable by everyone." 
 ON profiles FOR SELECT 
 USING (true);
 
+DROP POLICY IF EXISTS "Users can insert their own profile." ON profiles;
 CREATE POLICY "Users can insert their own profile." 
 ON profiles FOR INSERT 
 WITH CHECK (auth.uid() = id);
 
+DROP POLICY IF EXISTS "Users can update own profile." ON profiles;
 CREATE POLICY "Users can update own profile." 
 ON profiles FOR UPDATE 
 USING (auth.uid() = id);
@@ -78,23 +81,26 @@ CREATE INDEX IF NOT EXISTS messages_created_at_idx ON messages(created_at DESC);
 -- Row Level Security (RLS) を有効化
 ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
 
--- ポリシーを作成
--- 受信者は自分宛のメッセージを閲覧可能
+-- ポリシーを作成（既存の場合は先に削除）
+DROP POLICY IF EXISTS "Users can view messages sent to them" ON messages;
 CREATE POLICY "Users can view messages sent to them" 
 ON messages FOR SELECT 
 USING (auth.uid() = recipient_id);
 
 -- 送信者は自分が送ったメッセージを閲覧可能
+DROP POLICY IF EXISTS "Users can view messages they sent" ON messages;
 CREATE POLICY "Users can view messages they sent" 
 ON messages FOR SELECT 
 USING (auth.uid() = sender_id);
 
 -- ユーザーはメッセージを送信可能
+DROP POLICY IF EXISTS "Users can send messages" ON messages;
 CREATE POLICY "Users can send messages" 
 ON messages FOR INSERT 
 WITH CHECK (auth.uid() = sender_id);
 
 -- 受信者は自分宛のメッセージの既読状態を更新可能
+DROP POLICY IF EXISTS "Recipients can update read status" ON messages;
 CREATE POLICY "Recipients can update read status" 
 ON messages FOR UPDATE 
 USING (auth.uid() = recipient_id) 
