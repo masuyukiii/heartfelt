@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { getUsers, type User } from '@/lib/supabase/users';
 
 // 6段階成長システム関数
 function getGrowthStageIcon(totalPoints: number) {
@@ -73,7 +74,10 @@ export default function DashboardDemoPage() {
   const remainingPoints = Math.max(rewardGoal.requiredPoints - totalPoints, 0);
   const progressPercentage = Math.min((totalPoints / rewardGoal.requiredPoints) * 100, 100);
 
-  // モック受信者リスト
+  const [users, setUsers] = useState<User[]>([]);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(false);
+  
+  // デモ用のフォールバック受信者リスト
   const mockRecipients = [
     { id: '1', name: '田中さん', department: 'マーケティング部' },
     { id: '2', name: '佐藤さん', department: 'エンジニアリング部' },
@@ -93,7 +97,22 @@ export default function DashboardDemoPage() {
     if (savedPoints) {
       setMockData(JSON.parse(savedPoints));
     }
+
+    // ユーザー一覧を取得
+    loadUsers();
   }, []);
+
+  const loadUsers = async () => {
+    setIsLoadingUsers(true);
+    try {
+      const fetchedUsers = await getUsers();
+      setUsers(fetchedUsers);
+    } catch (error) {
+      console.error('Failed to load users:', error);
+    } finally {
+      setIsLoadingUsers(false);
+    }
+  };
 
   // ポイントが変更されたときにローカルストレージに保存
   useEffect(() => {
@@ -207,15 +226,19 @@ export default function DashboardDemoPage() {
     await new Promise(resolve => setTimeout(resolve, 1500));
     
     // 送信したメッセージに対する返信を受信ボックスに追加（自分宛）
-    const selectedRecipientData = mockRecipients.find(r => r.id === selectedRecipient);
+    const recipients = users.length > 0 ? users : mockRecipients;
+    const selectedRecipientData = recipients.find(r => r.id === selectedRecipient);
     if (selectedRecipientData) {
       // 送信したメッセージに対する自動返信を生成
-      const replyMessage = generateAutoReply(type, selectedRecipientData.name, message);
+      const recipientName = ('email' in selectedRecipientData) 
+        ? (selectedRecipientData.name || selectedRecipientData.email || '匿名ユーザー')
+        : selectedRecipientData.name;
+      const replyMessage = generateAutoReply(type, recipientName, message);
       
       const newMessage = {
         id: Date.now().toString(),
         type: type,
-        sender: selectedRecipientData.name,
+        sender: recipientName,
         content: replyMessage,
         receivedAt: '今',
         isRead: false
@@ -427,22 +450,33 @@ export default function DashboardDemoPage() {
                 {/* 宛先選択 */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-3">宛先を選択してください</label>
-                  <div className="space-y-2 max-h-40 overflow-y-auto">
-                    {mockRecipients.map((recipient) => (
-                      <button
-                        key={recipient.id}
-                        onClick={() => setSelectedRecipient(recipient.id)}
-                        className={`w-full text-left p-3 rounded-xl border-2 transition-all duration-200 ${
-                          selectedRecipient === recipient.id
-                            ? 'border-pink-500 bg-pink-50'
-                            : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                        }`}
-                      >
-                        <div className="font-medium text-gray-900">{recipient.name}</div>
-                        <div className="text-xs text-gray-500">{recipient.department}</div>
-                      </button>
-                    ))}
-                  </div>
+                  {isLoadingUsers ? (
+                    <div className="text-center py-4">
+                      <div className="animate-spin w-6 h-6 border-2 border-pink-500 border-t-transparent rounded-full mx-auto"></div>
+                      <p className="text-sm text-gray-500 mt-2">ユーザー一覧を読み込み中...</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2 max-h-40 overflow-y-auto">
+                      {(users.length > 0 ? users : mockRecipients).map((recipient) => (
+                        <button
+                          key={recipient.id}
+                          onClick={() => setSelectedRecipient(recipient.id)}
+                          className={`w-full text-left p-3 rounded-xl border-2 transition-all duration-200 ${
+                            selectedRecipient === recipient.id
+                              ? 'border-pink-500 bg-pink-50'
+                              : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                          }`}
+                        >
+                          <div className="font-medium text-gray-900">
+                            {('email' in recipient) ? (recipient.name || recipient.email || '匿名ユーザー') : recipient.name}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {('email' in recipient) ? (recipient.department || 'Supabaseユーザー') : recipient.department}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 {/* メッセージ入力 */}
@@ -503,22 +537,33 @@ export default function DashboardDemoPage() {
                 {/* 宛先選択 */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-3">宛先を選択してください</label>
-                  <div className="space-y-2 max-h-40 overflow-y-auto">
-                    {mockRecipients.map((recipient) => (
-                      <button
-                        key={recipient.id}
-                        onClick={() => setSelectedRecipient(recipient.id)}
-                        className={`w-full text-left p-3 rounded-xl border-2 transition-all duration-200 ${
-                          selectedRecipient === recipient.id
-                            ? 'border-blue-500 bg-blue-50'
-                            : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                        }`}
-                      >
-                        <div className="font-medium text-gray-900">{recipient.name}</div>
-                        <div className="text-xs text-gray-500">{recipient.department}</div>
-                      </button>
-                    ))}
-                  </div>
+                  {isLoadingUsers ? (
+                    <div className="text-center py-4">
+                      <div className="animate-spin w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full mx-auto"></div>
+                      <p className="text-sm text-gray-500 mt-2">ユーザー一覧を読み込み中...</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2 max-h-40 overflow-y-auto">
+                      {(users.length > 0 ? users : mockRecipients).map((recipient) => (
+                        <button
+                          key={recipient.id}
+                          onClick={() => setSelectedRecipient(recipient.id)}
+                          className={`w-full text-left p-3 rounded-xl border-2 transition-all duration-200 ${
+                            selectedRecipient === recipient.id
+                              ? 'border-blue-500 bg-blue-50'
+                              : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                          }`}
+                        >
+                          <div className="font-medium text-gray-900">
+                            {('email' in recipient) ? (recipient.name || recipient.email || '匿名ユーザー') : recipient.name}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {('email' in recipient) ? (recipient.department || 'Supabaseユーザー') : recipient.department}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 {/* メッセージ入力 */}
