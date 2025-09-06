@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
     
     // 既存の会話履歴がある場合は追加
     if (conversationContext) {
-      const contextLines = conversationContext.split('\n').filter(line => line.trim())
+      const contextLines = conversationContext.split('\n').filter((line: string) => line.trim())
       for (const line of contextLines) {
         if (line.startsWith('user: ')) {
           messages.push({

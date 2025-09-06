@@ -32,7 +32,7 @@ export default function ProfileEditModal({ isOpen, onClose, onUpdate }: ProfileE
         setName(profile.name || '');
         setDepartment(profile.department || '');
       }
-    } catch (err) {
+    } catch {
       setError('プロフィール情報の取得に失敗しました');
     } finally {
       setLoading(false);
@@ -62,7 +62,7 @@ export default function ProfileEditModal({ isOpen, onClose, onUpdate }: ProfileE
       } else {
         setError(result.error || '更新に失敗しました');
       }
-    } catch (err) {
+    } catch {
       setError('予期しないエラーが発生しました');
     } finally {
       setIsSubmitting(false);

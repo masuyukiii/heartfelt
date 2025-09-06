@@ -29,27 +29,6 @@ function getGrowthMessage(totalPoints: number, targetPoints: number) {
   return '美しく花が咲きました！\n目標達成まであとちょっと！';
 }
 
-// 自動返信メッセージを生成する関数
-function generateAutoReply(type: 'thanks' | 'honesty', senderName: string, originalMessage: string): string {
-  const thanksReplies = [
-    `${originalMessage.substring(0, 20)}...のメッセージ、とても嬉しかったです！こちらこそありがとうございます😊`,
-    `温かいお言葉をいただき、ありがとうございます。${senderName}さんのおかげで頑張れます！`,
-    `ありがとうございます！${senderName}さんと一緒に働けて本当に良かったです。`,
-    `お気遣いいただき、ありがとうございます。${senderName}さんの優しさに感謝しています。`,
-    `メッセージを読んで元気が出ました！${senderName}さん、ありがとうございます。`
-  ];
-  
-  const honestyReplies = [
-    `正直なお気持ちを伝えてくださり、ありがとうございます。${senderName}さんのご意見、参考になります。`,
-    `率直なフィードバックをいただき、感謝しています。一緒に改善していきましょう！`,
-    `本音でお話しくださり、ありがとうございます。${senderName}さんとはオープンに話せて心強いです。`,
-    `貴重なご意見をありがとうございます。${senderName}さんの視点、とても参考になりました。`,
-    `正直な気持ちを共有してくださり、ありがとうございます。信頼関係を感じています。`
-  ];
-  
-  const replies = type === 'thanks' ? thanksReplies : honestyReplies;
-  return replies[Math.floor(Math.random() * replies.length)];
-}
 
 type ViewMode = 'dashboard' | 'inbox';
 
@@ -590,7 +569,7 @@ export default function DashboardDemoPage() {
     if (quotedMatch) return quotedMatch[1];
     
     // 『』で囲まれたメッセージ部分を抽出
-    const messageMatch = content.match(/『([^』]+)』/s);
+    const messageMatch = content.match(/『([^』]+)』/);
     if (messageMatch) return messageMatch[1];
     
     // ---で囲まれたメッセージ部分を抽出
@@ -598,7 +577,7 @@ export default function DashboardDemoPage() {
     if (dashMatch) return dashMatch[1].trim();
     
     // 「こんな感じで伝えてみるのはどうでしょう？」の後の段落を抽出
-    const suggestionMatch = content.match(/こんな感じで伝えてみるのはどうでしょう[？?]\s*\n\s*(.+?)(?:\n\n|$)/s);
+    const suggestionMatch = content.match(/こんな感じで伝えてみるのはどうでしょう[？?]\s*\n\s*([\s\S]+?)(?:\n\n|$)/);
     if (suggestionMatch) return suggestionMatch[1].trim();
     
     return null;

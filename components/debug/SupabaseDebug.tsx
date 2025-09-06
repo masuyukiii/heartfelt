@@ -5,9 +5,9 @@ import { createClient } from '@/lib/supabase/client';
 import { getUsers } from '@/lib/supabase/users';
 
 export default function SupabaseDebug() {
-  const [user, setUser] = useState<any>(null);
-  const [users, setUsers] = useState<any[]>([]);
-  const [profiles, setProfiles] = useState<any[]>([]);
+  const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
+  const [users, setUsers] = useState<Array<{ id: string; name?: string; email: string }>>([]);
+  const [profiles, setProfiles] = useState<Array<{ id: string; name?: string; department?: string }>>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
 

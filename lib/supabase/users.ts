@@ -26,7 +26,7 @@ export async function getUsers(): Promise<User[]> {
     console.log('Current user found:', currentUser.email)
 
     // profilesテーブルが存在するかチェック
-    let profiles: any[] = [];
+    let profiles: Array<{ id: string; name?: string; email: string; department?: string; avatar_url?: string; created_at?: string }> = [];
     try {
       const { data: profilesData, error: profileError } = await supabase
         .from('profiles')
@@ -49,7 +49,7 @@ export async function getUsers(): Promise<User[]> {
       name: profile.name || profile.email?.split('@')[0] || '匿名ユーザー',
       department: profile.department,
       avatar_url: profile.avatar_url,
-      created_at: profile.created_at
+      created_at: profile.created_at || new Date().toISOString()
     }))
 
   } catch (error) {
