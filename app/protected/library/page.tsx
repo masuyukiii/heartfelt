@@ -153,7 +153,7 @@ export default function LibraryPage() {
         <div className="absolute top-1/3 left-1/2 text-4xl">☁️</div>
       </div>
 
-      <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8 relative z-10">
+      <div className="max-w-md mx-auto space-y-6 sm:space-y-8 relative z-10">
         {/* ヘッダー */}
         <div className="text-center space-y-4">
           <div className="flex items-center justify-center mb-3">
@@ -256,7 +256,7 @@ export default function LibraryPage() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 gap-3">
             {filteredWords.map((word) => (
               <div
                 key={word.id}
