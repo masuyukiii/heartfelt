@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { getUsers, type User } from '@/lib/supabase/users';
+import { getReceivedMessages, markAsRead, type Message } from '@/lib/supabase/message-actions';
 
 // 6段階成長システム関数
 function getGrowthStageIcon(totalPoints: number) {
@@ -45,7 +45,10 @@ function generateAutoReply(type: 'thanks' | 'honesty', senderName: string, origi
   return replies[Math.floor(Math.random() * replies.length)];
 }
 
+type ViewMode = 'dashboard' | 'inbox';
+
 export default function DashboardDemoPage() {
+  const [viewMode, setViewMode] = useState<ViewMode>('dashboard');
   const [mockData, setMockData] = useState({
     thanksPoints: 12,
     honestyPoints: 8,
@@ -54,9 +57,15 @@ export default function DashboardDemoPage() {
   const [showThanksModal, setShowThanksModal] = useState(false);
   const [showHonestyModal, setShowHonestyModal] = useState(false);
   const [showGoalEditModal, setShowGoalEditModal] = useState(false);
+  const [showProfileEditModal, setShowProfileEditModal] = useState(false);
   const [selectedRecipient, setSelectedRecipient] = useState('');
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // 受信BOX用の状態
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [isLoadingMessages, setIsLoadingMessages] = useState(false);
+  const [messageError, setMessageError] = useState<string | null>(null);
 
   // ご褒美ゴール設定
   const [rewardGoal, setRewardGoal] = useState({
@@ -69,6 +78,20 @@ export default function DashboardDemoPage() {
   const [editGoalTitle, setEditGoalTitle] = useState('');
   const [editGoalDescription, setEditGoalDescription] = useState('');
   const [editGoalPoints, setEditGoalPoints] = useState(30);
+
+  // プロフィール情報
+  const [profileData, setProfileData] = useState({
+    name: 'あなたの名前',
+    email: 'your.email@example.com',
+    department: 'あなたの部署',
+    bio: 'よろしくお願いします！'
+  });
+
+  // プロフィール編集用の一時状態
+  const [editProfileName, setEditProfileName] = useState('');
+  const [editProfileEmail, setEditProfileEmail] = useState('');
+  const [editProfileDepartment, setEditProfileDepartment] = useState('');
+  const [editProfileBio, setEditProfileBio] = useState('');
 
   const totalPoints = mockData.thanksPoints + mockData.honestyPoints;
   const remainingPoints = Math.max(rewardGoal.requiredPoints - totalPoints, 0);
@@ -100,6 +123,15 @@ export default function DashboardDemoPage() {
 
     // ユーザー一覧を取得
     loadUsers();
+    
+    // メッセージを読み込み
+    loadMessages();
+
+    // プロフィールデータを読み込み
+    const savedProfile = localStorage.getItem('heartfelt-profile-data');
+    if (savedProfile) {
+      setProfileData(JSON.parse(savedProfile));
+    }
   }, []);
 
   const loadUsers = async () => {
@@ -111,6 +143,52 @@ export default function DashboardDemoPage() {
       console.error('Failed to load users:', error);
     } finally {
       setIsLoadingUsers(false);
+    }
+  };
+
+  const loadMessages = async () => {
+    setIsLoadingMessages(true);
+    setMessageError(null);
+    try {
+      const realMessages = await getReceivedMessages();
+      setMessages(realMessages);
+    } catch (error) {
+      console.error('Failed to load messages:', error);
+      setMessageError('メッセージの読み込みに失敗しました');
+    } finally {
+      setIsLoadingMessages(false);
+    }
+  };
+
+  const formatTimeAgo = (date: Date) => {
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / (1000 * 60));
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffMins < 1) return '今';
+    if (diffMins < 60) return `${diffMins}分前`;
+    if (diffHours < 24) return `${diffHours}時間前`;
+    if (diffDays < 7) return `${diffDays}日前`;
+    return date.toLocaleDateString('ja-JP');
+  };
+
+  const handleMarkAsRead = async (messageId: string) => {
+    try {
+      const result = await markAsRead(messageId);
+      
+      if (result.success) {
+        // メッセージリストを再読み込み
+        await loadMessages();
+        alert('既読状態の更新に成功しました');
+      } else {
+        console.error('Failed to mark as read:', result.error);
+        alert(`既読状態の更新に失敗しました: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('Mark as read error:', error);
+      alert('既読状態の更新中にエラーが発生しました');
     }
   };
 
@@ -175,6 +253,36 @@ export default function DashboardDemoPage() {
     setEditGoalTitle('');
     setEditGoalDescription('');
     setEditGoalPoints(30);
+  };
+
+  const openProfileEditModal = () => {
+    setEditProfileName(profileData.name);
+    setEditProfileEmail(profileData.email);
+    setEditProfileDepartment(profileData.department);
+    setEditProfileBio(profileData.bio);
+    setShowProfileEditModal(true);
+  };
+
+  const closeProfileEditModal = () => {
+    setShowProfileEditModal(false);
+    setEditProfileName('');
+    setEditProfileEmail('');
+    setEditProfileDepartment('');
+    setEditProfileBio('');
+  };
+
+  const handleSaveProfile = () => {
+    const newProfile = {
+      name: editProfileName || 'あなたの名前',
+      email: editProfileEmail || 'your.email@example.com',
+      department: editProfileDepartment || 'あなたの部署',
+      bio: editProfileBio || 'よろしくお願いします！'
+    };
+
+    setProfileData(newProfile);
+    localStorage.setItem('heartfelt-profile-data', JSON.stringify(newProfile));
+    closeProfileEditModal();
+    alert('プロフィール情報を更新しました！');
   };
 
   const handleSaveGoal = () => {
@@ -263,7 +371,163 @@ export default function DashboardDemoPage() {
     
     // 簡単な成功通知
     alert(`${type === 'thanks' ? 'ありがとう' : '本音'}メッセージを送信しました！\n受信BOXで確認できます。`);
+    
+    // メッセージリストを更新
+    loadMessages();
   };
+
+  // 受信BOXビューの場合
+  if (viewMode === 'inbox') {
+    const unreadCount = messages.filter(msg => !msg.is_read).length;
+    const thanksCount = messages.filter(m => m.type === 'thanks').length;
+    const honestyCount = messages.filter(m => m.type === 'honesty').length;
+
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-purple-50 px-4 py-6 sm:px-6 sm:py-8">
+        <div className="max-w-md mx-auto space-y-6 sm:space-y-8">
+          {/* ヘッダー */}
+          <div className="text-center space-y-4">
+            <div className="flex items-center justify-center mb-3">
+              <div className="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center mr-3">
+                <span className="text-white text-lg">📫</span>
+              </div>
+              <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+                受信BOX
+              </h1>
+            </div>
+            <p className="text-slate-600 text-sm leading-relaxed">
+              あなたに届いたメッセージを確認しましょう
+            </p>
+            {unreadCount > 0 && (
+              <div className="inline-flex items-center bg-red-500 text-white px-4 py-2 rounded-xl font-semibold shadow-sm">
+                <span className="w-2 h-2 bg-white rounded-full mr-2 animate-pulse"></span>
+                未読 {unreadCount}件
+              </div>
+            )}
+          </div>
+
+          {/* ダッシュボードに戻るボタン */}
+          <div className="text-center">
+            <button
+              onClick={() => setViewMode('dashboard')}
+              className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg font-semibold transition-colors text-sm"
+            >
+              ← ダッシュボードに戻る
+            </button>
+          </div>
+
+          {/* エラー表示 */}
+          {messageError && (
+            <div className="bg-red-100 border-l-4 border-red-500 p-4">
+              <p className="text-sm text-red-700">{messageError}</p>
+              <button 
+                onClick={loadMessages}
+                className="mt-2 text-xs bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
+              >
+                再試行
+              </button>
+            </div>
+          )}
+
+          {/* メッセージリスト */}
+          {isLoadingMessages ? (
+            <div className="text-center py-8">
+              <div className="animate-spin w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full mx-auto"></div>
+              <p className="text-sm text-gray-500 mt-3">メッセージを読み込み中...</p>
+            </div>
+          ) : messages.length === 0 ? (
+            <div className="bg-gray-100 rounded-lg p-8 text-center">
+              <div className="text-4xl mb-4">📭</div>
+              <p className="text-gray-600">まだメッセージがありません</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {messages.map((message) => (
+                <div
+                  key={message.id}
+                  className={`bg-white rounded-lg shadow-md p-4 border-l-4 transition-all duration-200 ${
+                    message.type === 'thanks' 
+                      ? 'border-green-500' 
+                      : 'border-blue-500'
+                  } ${!message.is_read ? 'ring-2 ring-purple-200 shadow-lg' : ''}`}
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex items-center space-x-2">
+                      <span className="text-lg">
+                        {message.type === 'thanks' ? '💚' : '💭'}
+                      </span>
+                      <div>
+                        <span className="font-semibold text-gray-800">
+                          {message.sender_name || 'Anonymous'}
+                        </span>
+                        <span className="text-sm text-gray-500 ml-2">
+                          {message.type === 'thanks' ? 'ありがとうメッセージ' : '本音メッセージ'}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-xs text-gray-500">
+                        {formatTimeAgo(new Date(message.created_at))}
+                      </span>
+                      {!message.is_read && (
+                        <div className="mt-1">
+                          <button
+                            onClick={() => handleMarkAsRead(message.id)}
+                            className="text-xs bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
+                          >
+                            既読にする
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <p className="text-gray-700 leading-relaxed">
+                    {message.content}
+                  </p>
+                  
+                  {!message.is_read && (
+                    <div className="mt-3 p-2 bg-green-50 rounded text-sm text-green-700">
+                      💚 このメッセージを読むと+1ポイント獲得！
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* 統計情報 */}
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <h3 className="text-lg font-semibold mb-4 text-gray-800">
+              📊 受信統計
+            </h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="text-center p-3 bg-green-50 rounded-lg">
+                <div className="text-2xl mb-1">💚</div>
+                <div className="text-sm text-gray-600">ありがとうメッセージ</div>
+                <div className="font-bold text-green-600">{thanksCount}件</div>
+              </div>
+              <div className="text-center p-3 bg-blue-50 rounded-lg">
+                <div className="text-2xl mb-1">💭</div>
+                <div className="text-sm text-gray-600">本音メッセージ</div>
+                <div className="font-bold text-blue-600">{honestyCount}件</div>
+              </div>
+            </div>
+          </div>
+
+          {/* リフレッシュボタン */}
+          <div className="text-center">
+            <button
+              onClick={loadMessages}
+              className="bg-purple-500 hover:bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+            >
+              🔄 メッセージを更新
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50">
@@ -309,13 +573,22 @@ export default function DashboardDemoPage() {
           {/* ヘッダー - ご褒美ゴール */}
           <div className="bg-gradient-to-r from-emerald-500 to-teal-500 px-6 py-8 text-center relative overflow-hidden">
             <div className="absolute inset-0 bg-white/10"></div>
-            <button
-              onClick={openGoalEditModal}
-              className="absolute top-4 right-4 text-white hover:bg-white/20 rounded-full p-2 transition-all duration-200"
-              title="ご褒美ゴールを編集"
-            >
-              ✏️
-            </button>
+            <div className="absolute top-4 right-4 flex space-x-2">
+              <button
+                onClick={openProfileEditModal}
+                className="text-white hover:bg-white/20 rounded-full p-2 transition-all duration-200"
+                title="プロフィールを編集"
+              >
+                👤
+              </button>
+              <button
+                onClick={openGoalEditModal}
+                className="text-white hover:bg-white/20 rounded-full p-2 transition-all duration-200"
+                title="ご褒美ゴールを編集"
+              >
+                ✏️
+              </button>
+            </div>
             <div className="relative z-10">
               <div className="inline-flex items-center justify-center w-12 h-12 bg-white/20 rounded-full mb-3">
                 <span className="text-2xl">🎯</span>
@@ -414,12 +687,18 @@ export default function DashboardDemoPage() {
             </div>
             
             <div className="grid grid-cols-2 gap-4">
-              <Link href="/inbox-demo" className="block">
-                <button className="group w-full bg-white border-2 border-gray-200 text-gray-700 p-4 rounded-2xl hover:border-purple-300 hover:bg-purple-50 transition-all duration-200 hover:scale-105 active:scale-95">
-                  <div className="text-2xl mb-2 group-hover:scale-110 transition-transform duration-200">📫</div>
-                  <div className="text-sm font-semibold">受信<br />BOX</div>
-                </button>
-              </Link>
+              <button 
+                onClick={() => setViewMode('inbox')}
+                className="group w-full bg-white border-2 border-gray-200 text-gray-700 p-4 rounded-2xl hover:border-purple-300 hover:bg-purple-50 transition-all duration-200 hover:scale-105 active:scale-95"
+              >
+                <div className="text-2xl mb-2 group-hover:scale-110 transition-transform duration-200">📫</div>
+                <div className="text-sm font-semibold">受信<br />BOX</div>
+                {messages.filter(m => !m.is_read).length > 0 && (
+                  <div className="text-xs bg-red-500 text-white px-2 py-1 rounded-full mt-1">
+                    {messages.filter(m => !m.is_read).length}件未読
+                  </div>
+                )}
+              </button>
               
               <button className="group w-full bg-white border-2 border-gray-200 text-gray-400 p-4 rounded-2xl cursor-not-allowed">
                 <div className="text-2xl mb-2">📚</div>
@@ -598,6 +877,88 @@ export default function DashboardDemoPage() {
                   ) : (
                     '💭 本音を送る'
                   )}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* プロフィール編集モーダル */}
+        {showProfileEditModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+            <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+              {/* ヘッダー */}
+              <div className="bg-gradient-to-r from-gray-600 to-gray-700 px-6 py-4 text-center relative">
+                <button
+                  onClick={closeProfileEditModal}
+                  className="absolute left-4 top-4 text-white hover:bg-white/20 rounded-full p-2 transition-all duration-200"
+                >
+                  ✕
+                </button>
+                <div className="text-3xl mb-2">👤</div>
+                <h2 className="text-white text-xl font-bold">プロフィール編集</h2>
+              </div>
+
+              <div className="p-6 space-y-6">
+                {/* 名前 */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-3">お名前</label>
+                  <input
+                    type="text"
+                    value={editProfileName}
+                    onChange={(e) => setEditProfileName(e.target.value)}
+                    placeholder="あなたの名前"
+                    maxLength={50}
+                    className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-gray-500 focus:outline-none transition-colors duration-200"
+                  />
+                </div>
+
+                {/* メールアドレス */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-3">メールアドレス</label>
+                  <input
+                    type="email"
+                    value={editProfileEmail}
+                    onChange={(e) => setEditProfileEmail(e.target.value)}
+                    placeholder="your.email@example.com"
+                    maxLength={100}
+                    className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-gray-500 focus:outline-none transition-colors duration-200"
+                  />
+                </div>
+
+                {/* 部署 */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-3">部署</label>
+                  <input
+                    type="text"
+                    value={editProfileDepartment}
+                    onChange={(e) => setEditProfileDepartment(e.target.value)}
+                    placeholder="あなたの部署"
+                    maxLength={50}
+                    className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-gray-500 focus:outline-none transition-colors duration-200"
+                  />
+                </div>
+
+                {/* 自己紹介 */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-3">自己紹介</label>
+                  <textarea
+                    value={editProfileBio}
+                    onChange={(e) => setEditProfileBio(e.target.value)}
+                    placeholder="よろしくお願いします！"
+                    maxLength={200}
+                    rows={4}
+                    className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-gray-500 focus:outline-none resize-none transition-colors duration-200"
+                  />
+                  <div className="text-xs text-gray-500 mt-1">{editProfileBio.length}/200文字</div>
+                </div>
+
+                {/* 保存ボタン */}
+                <button
+                  onClick={handleSaveProfile}
+                  className="w-full py-4 rounded-2xl font-semibold bg-gradient-to-r from-gray-600 to-gray-700 text-white hover:shadow-lg hover:scale-105 transition-all duration-200"
+                >
+                  👤 プロフィールを保存
                 </button>
               </div>
             </div>
