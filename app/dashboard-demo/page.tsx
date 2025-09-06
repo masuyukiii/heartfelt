@@ -568,20 +568,20 @@ export default function DashboardDemoPage() {
           {/* ヘッダー - ご褒美ゴール */}
           <div className="bg-gradient-to-r from-emerald-500 to-teal-500 px-6 py-8 text-center relative overflow-hidden">
             <div className="absolute inset-0 bg-white/10"></div>
-            <div className="absolute top-4 right-4 flex space-x-2">
+            <div className="absolute top-2 right-2 flex space-x-1">
               <button
                 onClick={openProfileEditModal}
-                className="text-white hover:bg-white/20 rounded-full p-2 transition-all duration-200"
+                className="text-white hover:bg-white/30 hover:scale-110 rounded-full p-3 transition-all duration-200 cursor-pointer select-none"
                 title="プロフィールを編集"
               >
-                👤
+                <span className="text-lg">👤</span>
               </button>
               <button
                 onClick={openGoalEditModal}
-                className="text-white hover:bg-white/20 rounded-full p-2 transition-all duration-200"
+                className="text-white hover:bg-white/30 hover:scale-110 rounded-full p-3 transition-all duration-200 cursor-pointer select-none"
                 title="ご褒美ゴールを編集"
               >
-                ✏️
+                <span className="text-lg">✏️</span>
               </button>
             </div>
             <div className="relative z-10">
