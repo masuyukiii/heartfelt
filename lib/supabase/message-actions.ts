@@ -1,5 +1,4 @@
 import { createClient } from '@/lib/supabase/client'
-import { getCurrentUserProfile } from '@/lib/supabase/profile-actions'
 
 export interface Message {
   id: string

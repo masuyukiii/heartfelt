@@ -42,7 +42,7 @@ export default function ProtectedPage() {
     thanksPoints: 0,
     honestyPoints: 0,
   });
-  const [isLoadingTeamPoints, setIsLoadingTeamPoints] = useState(true);
+  const [, setIsLoadingTeamPoints] = useState(true);
   const [showCelebration, setShowCelebration] = useState(false);
   const [showThanksModal, setShowThanksModal] = useState(false);
   const [showHonestyModal, setShowHonestyModal] = useState(false);
@@ -339,15 +339,15 @@ export default function ProtectedPage() {
     return () => clearInterval(interval);
   }, [motivations]);
 
-  const refreshTeamPoints = async () => {
-    await loadTeamPoints();
-    
-    // 達成時のセレブレーション（現在のポイントで判定）
-    if (totalPoints >= rewardGoal.requiredPoints) {
-      setShowCelebration(true);
-      setTimeout(() => setShowCelebration(false), 2000);
-    }
-  };
+  // const refreshTeamPoints = async () => {
+  //   await loadTeamPoints();
+  //   
+  //   // 達成時のセレブレーション（現在のポイントで判定）
+  //   if (totalPoints >= rewardGoal.requiredPoints) {
+  //     setShowCelebration(true);
+  //     setTimeout(() => setShowCelebration(false), 2000);
+  //   }
+  // };
 
   const addPoints = (type: 'thanks' | 'honesty') => {
     // デモ用：即座にポイントを増やす（実際のアプリではこれは不要）

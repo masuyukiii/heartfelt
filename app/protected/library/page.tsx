@@ -48,7 +48,7 @@ function getCloudSize(content: string) {
 }
 
 export default function LibraryPage() {
-  const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
+  const [, setUser] = useState<{ id: string; email?: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [words, setWords] = useState<WordLibraryEntry[]>([]);
   const [isLoadingWords, setIsLoadingWords] = useState(false);
@@ -93,8 +93,8 @@ export default function LibraryPage() {
       const result = await getLibraryStats();
       if (result.success) {
         setStats({
-          thanksCount: result.thanksCount,
-          honestyCount: result.honestyCount,
+          thanksCount: result.thanksCount || 0,
+          honestyCount: result.honestyCount || 0,
         });
       }
     } catch (error) {
