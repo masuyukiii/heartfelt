@@ -256,43 +256,46 @@ export default function LibraryPage() {
             </p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
             {filteredWords.map((word) => (
               <div
                 key={word.id}
-                className={`bg-white rounded-lg shadow-md p-4 border-l-4 transition-all duration-200 cursor-pointer hover:shadow-lg ${
+                className={`relative bg-white rounded-2xl shadow-lg p-4 transition-all duration-300 cursor-pointer hover:shadow-xl hover:scale-105 ${
                   word.message_type === 'thanks' 
-                    ? 'border-green-500' 
-                    : 'border-blue-500'
+                    ? 'bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200' 
+                    : 'bg-gradient-to-br from-blue-50 to-sky-50 border border-blue-200'
                 }`}
                 onClick={() => setSelectedWord(word)}
               >
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex items-center space-x-3">
-                    <span className="text-lg">
-                      {word.message_type === 'thanks' ? '💚' : '💭'}
-                    </span>
-                    <div className="flex items-center space-x-2">
-                      <span className="font-semibold text-gray-800">
-                        {word.original_sender_name || '匿名'}
-                      </span>
-                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                        word.message_type === 'thanks' 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-blue-100 text-blue-800'
-                      }`}>
-                        {word.message_type === 'thanks' ? 'ありがとう' : '本音'}
-                      </span>
-                    </div>
-                  </div>
+                <div className="text-center mb-3">
+                  <span className="text-3xl">
+                    {word.message_type === 'thanks' ? '💚' : '💭'}
+                  </span>
+                </div>
+                
+                <div className="text-center mb-2">
+                  <span className="text-xs font-medium text-gray-600">
+                    {word.original_sender_name || '匿名'}
+                  </span>
+                </div>
+                
+                <div className={`text-center mb-2 px-3 py-1 rounded-full text-xs font-medium inline-block w-full ${
+                  word.message_type === 'thanks' 
+                    ? 'bg-green-100 text-green-700' 
+                    : 'bg-blue-100 text-blue-700'
+                }`}>
+                  {word.message_type === 'thanks' ? 'ありがとう' : '本音'}
+                </div>
+                
+                <p className="text-sm text-gray-700 text-center line-clamp-3 mb-2">
+                  {word.message_content}
+                </p>
+                
+                <div className="text-center">
                   <span className="text-xs text-gray-500">
                     {formatTimeAgo(new Date(word.saved_at))}
                   </span>
                 </div>
-                
-                <p className="text-gray-700 leading-relaxed">
-                  {word.message_content}
-                </p>
               </div>
             ))}
           </div>
