@@ -64,6 +64,7 @@ export default function ProtectedPage() {
   
   // 感謝キーワードタグ
   const [currentKeywords, setCurrentKeywords] = useState<string[]>([]);
+  const [isKeywordChanging, setIsKeywordChanging] = useState(false);
   const thanksKeywords = [
     '的確なアドバイス', '神対応', 'さりげない優しさ', '学びになった', 
     '勇気をもらえた', '最高のチームプレイ', '尊敬しています', '視野が広がった',
@@ -359,14 +360,19 @@ export default function ProtectedPage() {
     return () => clearInterval(interval);
   }, [motivations]);
 
-  // キーワードタグを6秒ごとに更新
+  // キーワードタグを10秒ごとに更新（フェードイン・フェードアウト付き）
   useEffect(() => {
     if (!showThanksModal) return;
     
     const interval = setInterval(() => {
-      const shuffled = [...thanksKeywords].sort(() => Math.random() - 0.5);
-      setCurrentKeywords(shuffled.slice(0, 10));
-    }, 6000);
+      setIsKeywordChanging(true);
+      
+      setTimeout(() => {
+        const shuffled = [...thanksKeywords].sort(() => Math.random() - 0.5);
+        setCurrentKeywords(shuffled.slice(0, 10));
+        setIsKeywordChanging(false);
+      }, 500);
+    }, 10000);
 
     return () => clearInterval(interval);
   }, [showThanksModal]);
@@ -1260,7 +1266,11 @@ export default function ProtectedPage() {
                   
                   {/* キーワードタグ */}
                   <div className="mb-3 min-h-[56px]">
-                    <div className="flex flex-wrap gap-1.5 transition-opacity duration-500" key={currentKeywords.join(',')}>
+                    <div 
+                      className={`flex flex-wrap gap-1.5 transition-opacity duration-1000 ${
+                        isKeywordChanging ? 'opacity-0' : 'opacity-100'
+                      }`}
+                    >
                       {currentKeywords.map((keyword, index) => (
                         <span
                           key={`${keyword}-${index}`}
