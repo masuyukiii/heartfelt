@@ -181,7 +181,8 @@ export default function ProtectedPage() {
         setProfileData({
           name: profile.name || 'あなたの名前',
           department: profile.department || 'あなたの部署',
-          bio: 'よろしくお願いします！' // bioは使っていないのでデフォルト値
+          bio: 'よろしくお願いします！', // bioは使っていないのでデフォルト値
+          slackWebhookUrl: profile.slack_webhook_url || ''
         });
       }
     } catch (error) {
