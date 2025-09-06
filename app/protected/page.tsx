@@ -13,7 +13,7 @@ import { getAIFeedback, type ChatMessage } from '@/lib/claude/ai-assistant';
 
 // 6段階成長システム関数（目標割合ベース）
 function getGrowthStageIcon(totalPoints: number, targetPoints: number) {
-  if (totalPoints === 0) return '🌰'; // タネ
+  if (totalPoints === 0) return '/images/growth-stages/seed.png'; // タネ
   const percentage = (totalPoints / targetPoints) * 100;
   if (percentage <= 10) return '🌱'; // 芽
   if (percentage <= 30) return '🌿'; // 若葉
@@ -1075,8 +1075,21 @@ export default function ProtectedPage() {
             <div className="bg-gradient-to-b from-sky-50 to-emerald-50 rounded-xl p-3 mb-2 relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-transparent"></div>
               <div className="relative z-10 text-center">
-                <div className="text-3xl mb-1 filter drop-shadow-lg animate-pulse">
-                  {getGrowthStageIcon(totalPoints, rewardGoal.requiredPoints)}
+                <div className="mb-1 filter drop-shadow-lg animate-pulse">
+                  {(() => {
+                    const iconPath = getGrowthStageIcon(totalPoints, rewardGoal.requiredPoints);
+                    // 画像パスの場合はimgタグ、絵文字の場合はそのまま表示
+                    if (iconPath.startsWith('/')) {
+                      return (
+                        <img 
+                          src={iconPath} 
+                          alt="成長ステージ" 
+                          className="w-12 h-12 mx-auto object-contain"
+                        />
+                      );
+                    }
+                    return <span className="text-3xl">{iconPath}</span>;
+                  })()}
                 </div>
                 <p className="text-emerald-700 font-medium text-xs whitespace-pre-line mb-1">
                   {getGrowthMessage(totalPoints, rewardGoal.requiredPoints)}
