@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { createClient } from "@/lib/supabase/client";
 import { getUsers, type User } from '@/lib/supabase/users';
-import { getReceivedMessages, markAsRead, sendMessage, type Message } from '@/lib/supabase/message-actions';
+import { getReceivedMessages, markAsRead, sendMessage, getTeamPoints, type Message } from '@/lib/supabase/message-actions';
 import { updateProfile, getCurrentUserProfile } from '@/lib/supabase/profile-actions';
 import { saveMotivation, getAllMotivations, getMyMotivation, type Motivation } from '@/lib/supabase/motivation-actions';
 import { saveTeamGoal, getTeamGoal, createDefaultTeamGoal, type TeamGoal } from '@/lib/supabase/team-goal-actions';
@@ -37,10 +37,11 @@ export default function ProtectedPage() {
   const [, setUser] = useState<{ id: string; email?: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>('dashboard');
-  const [mockData, setMockData] = useState({
-    thanksPoints: 12,
-    honestyPoints: 8,
+  const [teamPoints, setTeamPoints] = useState({
+    thanksPoints: 0,
+    honestyPoints: 0,
   });
+  const [isLoadingTeamPoints, setIsLoadingTeamPoints] = useState(true);
   const [showCelebration, setShowCelebration] = useState(false);
   const [showThanksModal, setShowThanksModal] = useState(false);
   const [showHonestyModal, setShowHonestyModal] = useState(false);
@@ -100,7 +101,7 @@ export default function ProtectedPage() {
   const [editProfileDepartment, setEditProfileDepartment] = useState('');
   const [editProfileBio, setEditProfileBio] = useState('');
 
-  const totalPoints = mockData.thanksPoints + mockData.honestyPoints;
+  const totalPoints = teamPoints.thanksPoints + teamPoints.honestyPoints;
   const remainingPoints = Math.max(rewardGoal.requiredPoints - totalPoints, 0);
   const progressPercentage = Math.min((totalPoints / rewardGoal.requiredPoints) * 100, 100);
 
@@ -118,12 +119,12 @@ export default function ProtectedPage() {
 
   useEffect(() => {
     checkUser();
-    loadInitialData();
     loadUsers();
     loadMessages();
     loadProfile();
     loadMotivations();
     loadTeamGoal();
+    loadTeamPoints();
   }, []);
 
   const checkUser = async () => {
@@ -139,10 +140,32 @@ export default function ProtectedPage() {
     setLoading(false);
   };
 
-  const loadInitialData = () => {
-    const savedPoints = localStorage.getItem('heartfelt-demo-points');
-    if (savedPoints) {
-      setMockData(JSON.parse(savedPoints));
+  const loadTeamPoints = async () => {
+    setIsLoadingTeamPoints(true);
+    try {
+      const result = await getTeamPoints();
+      if (result.success) {
+        setTeamPoints({
+          thanksPoints: result.thanksPoints,
+          honestyPoints: result.honestyPoints,
+        });
+      } else {
+        console.error('Failed to load team points:', result.error);
+        // エラー時はデフォルト値を使用
+        setTeamPoints({
+          thanksPoints: 0,
+          honestyPoints: 0,
+        });
+      }
+    } catch (error) {
+      console.error('Load team points error:', error);
+      // エラー時はデフォルト値を使用
+      setTeamPoints({
+        thanksPoints: 0,
+        honestyPoints: 0,
+      });
+    } finally {
+      setIsLoadingTeamPoints(false);
     }
   };
 
@@ -256,11 +279,6 @@ export default function ProtectedPage() {
     }
   };
 
-  // ポイントが変更されたときにローカルストレージに保存
-  useEffect(() => {
-    localStorage.setItem('heartfelt-demo-points', JSON.stringify(mockData));
-  }, [mockData]);
-
   // 意気込みを5秒ごとにランダムに切り替え
   useEffect(() => {
     if (motivations.length <= 1) return;
@@ -278,8 +296,19 @@ export default function ProtectedPage() {
     return () => clearInterval(interval);
   }, [motivations]);
 
+  const refreshTeamPoints = async () => {
+    await loadTeamPoints();
+    
+    // 達成時のセレブレーション（現在のポイントで判定）
+    if (totalPoints >= rewardGoal.requiredPoints) {
+      setShowCelebration(true);
+      setTimeout(() => setShowCelebration(false), 2000);
+    }
+  };
+
   const addPoints = (type: 'thanks' | 'honesty') => {
-    setMockData(prev => ({
+    // デモ用：即座にポイントを増やす（実際のアプリではこれは不要）
+    setTeamPoints(prev => ({
       ...prev,
       [type === 'thanks' ? 'thanksPoints' : 'honestyPoints']: 
         prev[type === 'thanks' ? 'thanksPoints' : 'honestyPoints'] + 1
@@ -293,12 +322,11 @@ export default function ProtectedPage() {
   };
 
   const resetPoints = () => {
-    const newData = {
+    // デモ用：ポイントをリセット
+    setTeamPoints({
       thanksPoints: 0,
       honestyPoints: 0
-    };
-    setMockData(newData);
-    localStorage.setItem('heartfelt-demo-points', JSON.stringify(newData));
+    });
     setShowCelebration(false);
   };
 
@@ -396,18 +424,15 @@ export default function ProtectedPage() {
         // ご褒美の内容（タイトル）が変更された場合のみ進捗をリセット
         const isContentChanged = rewardGoal.title !== editGoalTitle;
         
-        if (isContentChanged && (mockData.thanksPoints > 0 || mockData.honestyPoints > 0)) {
+        if (isContentChanged && (teamPoints.thanksPoints > 0 || teamPoints.honestyPoints > 0)) {
           const shouldReset = confirm('ご褒美の内容を変更すると、現在の進捗がリセットされます。\n続行しますか？');
           
           if (shouldReset) {
             // ポイントをリセット
-            setMockData({
+            setTeamPoints({
               thanksPoints: 0,
               honestyPoints: 0
             });
-            
-            // ローカルストレージからもポイントデータを削除
-            localStorage.removeItem('heartfelt-demo-points');
           } else {
             return; // キャンセルされた場合は何もしない
           }
@@ -612,8 +637,8 @@ export default function ProtectedPage() {
       });
       
       if (result.success) {
-        // ポイント追加
-        addPoints(type);
+        // チームポイントを再読み込み
+        await loadTeamPoints();
         
         // 成功メッセージとモーダル閉じる
         setIsSubmitting(false);
@@ -1010,12 +1035,12 @@ export default function ProtectedPage() {
                 <div className="grid grid-cols-2 gap-2 mt-1">
                   <div className="bg-white/40 backdrop-blur-sm rounded-lg p-2 text-center border border-pink-200/50">
                     <div className="text-sm mb-1">💖</div>
-                    <div className="text-sm font-bold text-pink-600">{mockData.thanksPoints}</div>
+                    <div className="text-sm font-bold text-pink-600">{teamPoints.thanksPoints}</div>
                     <div className="text-xs text-pink-700">ありがとう</div>
                   </div>
                   <div className="bg-white/40 backdrop-blur-sm rounded-lg p-2 text-center border border-blue-200/50">
                     <div className="text-sm mb-1">💭</div>
-                    <div className="text-sm font-bold text-blue-600">{mockData.honestyPoints}</div>
+                    <div className="text-sm font-bold text-blue-600">{teamPoints.honestyPoints}</div>
                     <div className="text-xs text-blue-700">本音</div>
                   </div>
                 </div>

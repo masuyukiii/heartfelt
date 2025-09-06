@@ -127,6 +127,55 @@ export async function getReceivedMessages(): Promise<Message[]> {
   }
 }
 
+// チーム全体のメッセージポイントを取得
+export async function getTeamPoints() {
+  const supabase = createClient()
+  
+  try {
+    // 全メンバーの「ありがとう」メッセージ数を取得
+    const { count: thanksCount, error: thanksError } = await supabase
+      .from('messages')
+      .select('*', { count: 'exact', head: true })
+      .eq('type', 'thanks')
+
+    if (thanksError) {
+      console.error('Failed to fetch thanks messages count:', thanksError)
+      if (thanksError.code === 'PGRST116' || thanksError.message.includes('relation "messages" does not exist')) {
+        console.warn('Messages table does not exist. Returning 0 points.')
+        return { success: true, thanksPoints: 0, honestyPoints: 0 }
+      }
+      throw new Error(`ありがとうメッセージ取得エラー: ${thanksError.message}`)
+    }
+
+    // 全メンバーの「本音」メッセージ数を取得
+    const { count: honestyCount, error: honestyError } = await supabase
+      .from('messages')
+      .select('*', { count: 'exact', head: true })
+      .eq('type', 'honesty')
+
+    if (honestyError) {
+      console.error('Failed to fetch honesty messages count:', honestyError)
+      throw new Error(`本音メッセージ取得エラー: ${honestyError.message}`)
+    }
+
+    console.log('📊 Team points retrieved:', { thanksPoints: thanksCount || 0, honestyPoints: honestyCount || 0 })
+
+    return {
+      success: true,
+      thanksPoints: thanksCount || 0,
+      honestyPoints: honestyCount || 0
+    }
+  } catch (error) {
+    console.error('Get team points error:', error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : '不明なエラー',
+      thanksPoints: 0,
+      honestyPoints: 0
+    }
+  }
+}
+
 // メッセージを既読にする
 export async function markAsRead(messageId: string) {
   const supabase = createClient()
