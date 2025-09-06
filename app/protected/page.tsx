@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+cimport { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -19,11 +19,32 @@ export default async function ProtectedPage() {
     honestyPoints: 43,
     teamPoints: 285,
     userEmail: data.claims?.email || "ユーザー",
+    // 成長ポイント（デモ用の仮値）
+    growthPoints: 17,
     recentMessages: [
       { type: "thanks", message: "プレゼンの資料作成、お疲れ様でした！", from: "田中さん", time: "2時間前" },
       { type: "honest", message: "次回のミーティング、もう少し早めに準備を始めませんか？", to: "佐藤さん", time: "5時間前" }
     ]
   };
+
+  // 6段階の成長システム（0, 1-3, 4-8, 9-15, 16-25, 25-30）
+  const growthGoal = 30;
+  const growthStages = [
+    { label: "種", min: 0, max: 0 },
+    { label: "芽", min: 1, max: 3 },
+    { label: "小木", min: 4, max: 8 },
+    { label: "大木", min: 9, max: 15 },
+    { label: "花", min: 16, max: 25 },
+    { label: "花・実", min: 26, max: 30 },
+  ];
+  const currentPoints = mockData.growthPoints;
+  const clampedPoints = Math.max(0, Math.min(currentPoints, growthGoal));
+  const currentStage = growthStages.find(s => clampedPoints >= s.min && clampedPoints <= s.max) || growthStages[growthStages.length - 1];
+  const progressPercent = Math.round((clampedPoints / growthGoal) * 100);
+  const currentIndex = growthStages.findIndex(s => s.label === currentStage.label);
+  const pointsToNextStage = currentIndex >= growthStages.length - 1
+    ? 0
+    : Math.max(0, growthStages[currentIndex + 1].min - clampedPoints);
 
   return (
     <div className="flex-1 w-full px-4 py-6 max-w-md mx-auto">
@@ -78,7 +99,7 @@ export default async function ProtectedPage() {
         </div>
       </div>
 
-      {/* シンボルツリー（コンパクト表示） */}
+      {/* シンボルツリー（30点ゴール・6段階成長） */}
       <Card className="mb-6">
         <CardHeader className="pb-3">
           <CardTitle className="text-lg flex items-center gap-2">
@@ -91,13 +112,17 @@ export default async function ProtectedPage() {
             <div className="text-4xl">🌳</div>
             <div className="flex-1 space-y-2">
               <div className="flex items-center justify-between text-sm">
-                <span>チームの成長度</span>
-                <span className="font-semibold">75%</span>
+                <span>現在の段階</span>
+                <span className="font-semibold">{currentStage.label}</span>
+              </div>
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <span>成長度</span>
+                <span>{clampedPoints}/{growthGoal}（{progressPercent}%）</span>
               </div>
               <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
-                <div className="bg-green-500 h-3 rounded-full" style={{ width: '75%' }}></div>
+                <div className="bg-green-500 h-3 rounded-full" style={{ width: `${progressPercent}%` }}></div>
               </div>
-              <div className="text-xs text-muted-foreground">次の段階まで 72pt</div>
+              <div className="text-xs text-muted-foreground">次の段階まで {pointsToNextStage}点</div>
             </div>
           </div>
         </CardContent>
@@ -136,7 +161,7 @@ export default async function ProtectedPage() {
         </CardContent>
       </Card>
 
-      {/* ご褒美（コンパクト） */}
+      {/* ご褒美（ゴール30点に統一） */}
       <Card className="mb-6">
         <CardHeader className="pb-3">
           <CardTitle className="text-lg flex items-center gap-2">
@@ -148,19 +173,19 @@ export default async function ProtectedPage() {
           <div className="space-y-2">
             <div className="flex items-center justify-between text-sm">
               <span className="font-medium">個人：カフェタイム</span>
-              <Badge variant="outline" className="text-xs">200pt</Badge>
+              <Badge variant="outline" className="text-xs">30点</Badge>
             </div>
             <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-              <div className="bg-orange-500 h-2 rounded-full" style={{ width: '63%' }}></div>
+              <div className="bg-orange-500 h-2 rounded-full" style={{ width: `${progressPercent}%` }}></div>
             </div>
           </div>
           <div className="space-y-2">
             <div className="flex items-center justify-between text-sm">
               <span className="font-medium">チーム：ランチ会</span>
-              <Badge variant="outline" className="text-xs">500pt</Badge>
+              <Badge variant="outline" className="text-xs">30点</Badge>
             </div>
             <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-              <div className="bg-purple-500 h-2 rounded-full" style={{ width: '57%' }}></div>
+              <div className="bg-purple-500 h-2 rounded-full" style={{ width: `${progressPercent}%` }}></div>
             </div>
           </div>
         </CardContent>
