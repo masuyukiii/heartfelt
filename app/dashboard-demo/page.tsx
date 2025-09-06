@@ -26,7 +26,7 @@ function getGrowthMessage(totalPoints: number, targetPoints: number) {
   if (percentage <= 30) return '順調に成長しています';
   if (percentage <= 60) return '立派に育っています';
   if (percentage <= 90) return 'もうすぐ目標達成です';
-  return '美しく花が咲きました！目標達成まであとちょっと！';
+  return '美しく花が咲きました！\n目標達成まであとちょっと！';
 }
 
 // 自動返信メッセージを生成する関数
@@ -989,7 +989,7 @@ export default function DashboardDemoPage() {
                 <div className="text-7xl mb-4 filter drop-shadow-lg animate-pulse">
                   {getGrowthStageIcon(totalPoints, rewardGoal.requiredPoints)}
                 </div>
-                <p className="text-emerald-700 font-medium text-sm">
+                <p className="text-emerald-700 font-medium text-sm whitespace-pre-line">
                   {getGrowthMessage(totalPoints, rewardGoal.requiredPoints)}
                 </p>
                 <div className="mt-3 inline-flex items-center bg-white/60 backdrop-blur-sm px-3 py-1 rounded-full">
