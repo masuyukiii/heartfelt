@@ -13,13 +13,13 @@ import { getAIFeedback, type ChatMessage } from '@/lib/claude/ai-assistant';
 
 // 6段階成長システム関数（目標割合ベース）
 function getGrowthStageIcon(totalPoints: number, targetPoints: number) {
-  if (totalPoints === 0) return { path: '/images/growth-stages/seed.png', size: 'w-32' }; // タネ（小さめ）
+  if (totalPoints === 0) return { path: '/images/growth-stages/seed.png', size: 'w-48' }; // タネ（小さめ）
   const percentage = (totalPoints / targetPoints) * 100;
-  if (percentage <= 10) return { path: '/images/growth-stages/sprout.gif', size: 'w-40' }; // 芽
-  if (percentage <= 30) return { path: '/images/growth-stages/young-leaves.gif', size: 'w-40' }; // 若葉
-  if (percentage <= 60) return { path: '/images/growth-stages/small-tree.gif', size: 'w-40' }; // 小木
-  if (percentage <= 90) return { path: '/images/growth-stages/tree.gif', size: 'w-40' }; // 木
-  return { path: '/images/growth-stages/flower.gif', size: 'w-40' }; // 花
+  if (percentage <= 10) return { path: '/images/growth-stages/sprout.gif', size: 'w-56' }; // 芽
+  if (percentage <= 30) return { path: '/images/growth-stages/young-leaves.gif', size: 'w-56' }; // 若葉
+  if (percentage <= 60) return { path: '/images/growth-stages/small-tree.gif', size: 'w-56' }; // 小木
+  if (percentage <= 90) return { path: '/images/growth-stages/tree.gif', size: 'w-56' }; // 木
+  return { path: '/images/growth-stages/flower.gif', size: 'w-56' }; // 花
 }
 
 function getGrowthMessage(totalPoints: number, targetPoints: number) {
@@ -1038,13 +1038,13 @@ export default function ProtectedPage() {
           </div>
 
           {/* 進捗エリア */}
-          <div className="px-3 py-2 bg-gradient-to-b from-white to-gray-50">
+          <div className="px-3 py-1 bg-gradient-to-b from-white to-gray-50">
             
             {/* 進捗バー */}
             <div className="mb-2">
-              <div className="flex justify-between items-center mb-1">
-                <span className="text-sm font-medium text-gray-600">進捗状況</span>
-                <span className="text-sm font-bold text-gray-800">{totalPoints} / {rewardGoal.requiredPoints}</span>
+              <div className="flex justify-between items-center mb-0.5">
+                <span className="text-xs font-medium text-gray-600">進捗状況</span>
+                <span className="text-xs font-bold text-gray-800">{totalPoints} / {rewardGoal.requiredPoints}</span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
                 <div 
@@ -1055,7 +1055,7 @@ export default function ProtectedPage() {
             </div>
 
             {/* 達成メッセージ */}
-            <div className="text-center mb-2">
+            <div className="text-center mb-1">
               {remainingPoints > 0 ? (
                 <div className="space-y-1">
                   <p className="text-gray-600 text-xs">達成まで</p>
@@ -1105,21 +1105,21 @@ export default function ProtectedPage() {
                 <p className="text-emerald-700 font-medium text-xs whitespace-pre-line">
                   {getGrowthMessage(totalPoints, rewardGoal.requiredPoints)}
                 </p>
-                <div className="inline-flex items-center bg-white/60 backdrop-blur-sm px-2 py-0.5 rounded-full">
+                <div className="inline-flex items-center bg-white/60 backdrop-blur-sm px-1.5 py-0 rounded-full">
                   <span className="text-xs text-gray-600">現在 {totalPoints} ポイント</span>
                 </div>
                 
                 {/* ポイント詳細（植物エリア内に統合） */}
                 <div className="grid grid-cols-2 gap-1 mt-0.5">
-                  <div className="bg-white/40 backdrop-blur-sm rounded-lg p-1 text-center border border-pink-200/50">
-                    <div className="text-sm">💖</div>
-                    <div className="text-sm font-bold text-pink-600">{teamPoints.thanksPoints}</div>
-                    <div className="text-xs text-pink-700">ありがとう</div>
+                  <div className="bg-white/40 backdrop-blur-sm rounded-lg p-0.5 text-center border border-pink-200/50">
+                    <div className="text-xs">💖</div>
+                    <div className="text-xs font-bold text-pink-600">{teamPoints.thanksPoints}</div>
+                    <div className="text-[10px] text-pink-700">ありがとう</div>
                   </div>
-                  <div className="bg-white/40 backdrop-blur-sm rounded-lg p-1 text-center border border-blue-200/50">
-                    <div className="text-sm">💭</div>
-                    <div className="text-sm font-bold text-blue-600">{teamPoints.honestyPoints}</div>
-                    <div className="text-xs text-blue-700">本音</div>
+                  <div className="bg-white/40 backdrop-blur-sm rounded-lg p-0.5 text-center border border-blue-200/50">
+                    <div className="text-xs">💭</div>
+                    <div className="text-xs font-bold text-blue-600">{teamPoints.honestyPoints}</div>
+                    <div className="text-[10px] text-blue-700">本音</div>
                   </div>
                 </div>
               </div>
