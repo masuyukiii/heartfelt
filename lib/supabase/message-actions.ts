@@ -31,6 +31,16 @@ export async function sendMessage(data: {
       throw new Error('ユーザーが見つかりません')
     }
 
+    // UUIDの妥当性をチェック
+    if (!data.recipientId || typeof data.recipientId !== 'string' || data.recipientId.length !== 36) {
+      throw new Error('無効な宛先IDです')
+    }
+
+    // コンテンツの妥当性をチェック
+    if (!data.content || data.content.trim().length === 0) {
+      throw new Error('メッセージ内容を入力してください')
+    }
+
     const { error } = await supabase
       .from('messages')
       .insert({
@@ -41,6 +51,10 @@ export async function sendMessage(data: {
       })
 
     if (error) {
+      console.error('Supabase send message error:', error)
+      if (error.code === 'PGRST116' || error.message.includes('relation "messages" does not exist')) {
+        throw new Error('データベーステーブルが設定されていません。管理者にお問い合わせください。')
+      }
       throw new Error(`メッセージ送信エラー: ${error.message}`)
     }
 
@@ -77,6 +91,11 @@ export async function getReceivedMessages(): Promise<Message[]> {
 
     if (error) {
       console.error('Failed to fetch messages:', error)
+      // テーブルが存在しない場合は空配列を返す
+      if (error.code === 'PGRST116' || error.message.includes('relation "messages" does not exist')) {
+        console.warn('Messages table does not exist. Please run the database setup.')
+        return []
+      }
       return []
     }
 
@@ -103,6 +122,11 @@ export async function markAsRead(messageId: string) {
   const supabase = createClient()
   
   try {
+    // UUIDの妥当性をチェック
+    if (!messageId || typeof messageId !== 'string' || messageId.length !== 36) {
+      throw new Error('無効なメッセージIDです')
+    }
+
     const { error } = await supabase
       .from('messages')
       .update({ 
@@ -112,6 +136,7 @@ export async function markAsRead(messageId: string) {
       .eq('id', messageId)
 
     if (error) {
+      console.error('Supabase mark as read error:', error)
       throw new Error(`既読更新エラー: ${error.message}`)
     }
 
