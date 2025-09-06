@@ -233,36 +233,35 @@ export default function LibraryPage() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-3 gap-2">
             {filteredWords.map((word) => (
               <div
                 key={word.id}
-                className="relative rounded-2xl transition-all duration-300 cursor-pointer hover:shadow-xl hover:scale-105 aspect-square"
+                className="relative rounded-xl transition-all duration-300 cursor-pointer hover:shadow-lg hover:scale-105 p-3"
                 onClick={() => setSelectedWord(word)}
                 style={{
                   background: word.message_type === 'thanks' 
                     ? 'linear-gradient(145deg, #f0fdf4, #dcfce7)'
                     : 'linear-gradient(145deg, #eff6ff, #dbeafe)',
-                  boxShadow: '4px 4px 8px rgba(0,0,0,0.1), -2px -2px 6px rgba(255,255,255,0.9)',
+                  boxShadow: '3px 3px 6px rgba(0,0,0,0.08), -2px -2px 5px rgba(255,255,255,0.9)',
                   border: '1px solid rgba(255,255,255,0.5)'
                 }}
               >
-                <div className="flex flex-col items-center justify-center h-full p-4">
-                  <div className="mb-3">
-                    <span className="text-3xl">
-                      {word.message_type === 'thanks' ? '💚' : '💭'}
-                    </span>
-                  </div>
-                  
-                  <div className="text-center">
-                    <p className="text-sm text-gray-700 font-medium">
-                      {word.message_type === 'thanks' ? 'ありがとう' : '本音'}
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {filteredWords.filter(w => w.message_type === word.message_type).findIndex(w => w.id === word.id) + 1}個
-                    </p>
-                  </div>
+                <div className="text-center mb-2">
+                  <span className="text-xl">
+                    {word.message_type === 'thanks' ? '💚' : '💭'}
+                  </span>
                 </div>
+                
+                <div className="text-center mb-2">
+                  <span className="text-[10px] text-gray-500">
+                    {word.original_sender_name || '匿名'}
+                  </span>
+                </div>
+                
+                <p className="text-[10px] text-gray-600 text-center line-clamp-3 leading-relaxed">
+                  {word.message_content}
+                </p>
               </div>
             ))}
           </div>
