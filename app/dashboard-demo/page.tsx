@@ -81,6 +81,16 @@ export default function DashboardDemoPage() {
   const [messageError, setMessageError] = useState<string | null>(null);
   const [messageFilter, setMessageFilter] = useState<'unread' | 'all' | 'thanks' | 'honesty'>('all');
 
+  // 意気込み機能の状態
+  const [motivations, setMotivations] = useState([
+    { id: 1, name: '田中さん', content: '今月こそは自分にご褒美をあげるぞ！', timestamp: new Date() },
+    { id: 2, name: '佐藤さん', content: 'みんなで目標達成頑張ろう✨', timestamp: new Date() },
+    { id: 3, name: '鈴木さん', content: '小さな積み重ねが大きな成果に🌸', timestamp: new Date() }
+  ]);
+  const [isMotivationModalOpen, setIsMotivationModalOpen] = useState(false);
+  const [newMotivationName, setNewMotivationName] = useState('');
+  const [newMotivationContent, setNewMotivationContent] = useState('');
+
   // ご褒美ゴール設定
   const [rewardGoal, setRewardGoal] = useState({
     title: 'カフェで読書タイム',
@@ -359,6 +369,32 @@ export default function DashboardDemoPage() {
     } else {
       alert('ご褒美ゴールを更新しました！');
     }
+  };
+
+  // 意気込み追加機能の処理
+  const handleAddMotivation = () => {
+    if (!newMotivationName.trim() || !newMotivationContent.trim()) {
+      alert('名前と意気込みの両方を入力してください');
+      return;
+    }
+
+    const newMotivation = {
+      id: Date.now(),
+      name: newMotivationName,
+      content: newMotivationContent,
+      timestamp: new Date()
+    };
+
+    setMotivations(prev => [newMotivation, ...prev]);
+    setNewMotivationName('');
+    setNewMotivationContent('');
+    setIsMotivationModalOpen(false);
+    alert('意気込みを追加しました！');
+  };
+
+  const openMotivationModal = () => {
+    setNewMotivationName(profileData.name); // プロフィール名前をデフォルトに設定
+    setIsMotivationModalOpen(true);
   };
 
   // AI添削機能の処理
@@ -1367,29 +1403,25 @@ export default function DashboardDemoPage() {
                   </label>
                   <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 h-24 overflow-hidden relative">
                     <div className="motivation-scroll space-y-2">
-                      {/* サンプル意気込みメッセージ */}
-                      <div className="text-sm text-gray-700 animate-fade-in">
-                        <span className="font-medium text-blue-600">田中さん：</span>
-                        "今月こそは自分にご褒美をあげるぞ！"
-                      </div>
-                      <div className="text-sm text-gray-700 animate-fade-in" style={{animationDelay: '2s'}}>
-                        <span className="font-medium text-green-600">佐藤さん：</span>
-                        "みんなで目標達成頑張ろう✨"
-                      </div>
-                      <div className="text-sm text-gray-700 animate-fade-in" style={{animationDelay: '4s'}}>
-                        <span className="font-medium text-purple-600">鈴木さん：</span>
-                        "小さな積み重ねが大きな成果に🌸"
-                      </div>
+                      {motivations.slice(0, 3).map((motivation, index) => (
+                        <div key={motivation.id} className="text-sm text-gray-700 animate-fade-in" style={{animationDelay: `${index * 2}s`}}>
+                          <span className={`font-medium ${
+                            index === 0 ? 'text-blue-600' : 
+                            index === 1 ? 'text-green-600' : 
+                            'text-purple-600'
+                          }`}>
+                            {motivation.name}：
+                          </span>
+                          "{motivation.content}"
+                        </div>
+                      ))}
                     </div>
                   </div>
                   <button 
                     className="mt-2 text-xs text-blue-600 hover:text-blue-800 underline"
-                    onClick={() => {
-                      // 意気込み投稿モーダルを開く予定
-                      alert('意気込み投稿機能は開発中です');
-                    }}
+                    onClick={openMotivationModal}
                   >
-                    + あなたも意気込みを投稿する
+                    + 意気込みを追加する
                   </button>
                 </div>
 
@@ -1462,6 +1494,75 @@ export default function DashboardDemoPage() {
                   }`}
                 >
                   🎯 ご褒美ゴールを保存
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 意気込み追加モーダル */}
+        {isMotivationModalOpen && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl p-6 w-full max-w-md space-y-6">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-bold text-gray-800">
+                  💪 意気込みを追加
+                </h3>
+                <button
+                  onClick={() => setIsMotivationModalOpen(false)}
+                  className="text-gray-400 hover:text-gray-600 text-2xl"
+                >
+                  ×
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    お名前
+                  </label>
+                  <input
+                    type="text"
+                    value={newMotivationName}
+                    onChange={(e) => setNewMotivationName(e.target.value)}
+                    placeholder="あなたの名前"
+                    className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-colors"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    意気込み・応援メッセージ
+                  </label>
+                  <textarea
+                    value={newMotivationContent}
+                    onChange={(e) => setNewMotivationContent(e.target.value)}
+                    placeholder="例：今月こそは目標達成するぞ！"
+                    maxLength={100}
+                    rows={3}
+                    className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none resize-none transition-colors"
+                  />
+                  <div className="text-xs text-gray-500 mt-1">{newMotivationContent.length}/100文字</div>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setIsMotivationModalOpen(false)}
+                  className="flex-1 py-3 px-4 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors"
+                >
+                  キャンセル
+                </button>
+                <button
+                  onClick={handleAddMotivation}
+                  disabled={!newMotivationName.trim() || !newMotivationContent.trim()}
+                  className={`flex-1 py-3 px-4 rounded-xl font-semibold transition-all ${
+                    newMotivationName.trim() && newMotivationContent.trim()
+                      ? 'bg-blue-500 text-white hover:bg-blue-600'
+                      : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  }`}
+                >
+                  追加
                 </button>
               </div>
             </div>
