@@ -5,6 +5,7 @@ import { getUsers, type User } from '@/lib/supabase/users';
 import { getReceivedMessages, markAsRead, sendMessage, type Message } from '@/lib/supabase/message-actions';
 import { updateProfile, getCurrentUserProfile } from '@/lib/supabase/profile-actions';
 import { saveMotivation, getAllMotivations, getMyMotivation, type Motivation } from '@/lib/supabase/motivation-actions';
+import { saveTeamGoal, getTeamGoal, createDefaultTeamGoal, type TeamGoal } from '@/lib/supabase/team-goal-actions';
 import { getAIFeedback, type ChatMessage } from '@/lib/claude/ai-assistant';
 
 // 6段階成長システム関数（目標割合ベース）
@@ -92,12 +93,15 @@ export default function DashboardDemoPage() {
 
   // userRewardSettingsとcurrentRewardIndexは削除（固定ゴール表示のため不要）
 
-  // ご褒美ゴール設定（チーム固定）
-  const [rewardGoal, setRewardGoal] = useState({
-    title: 'カフェタイム',
-    description: 'お気に入りのカフェで読書',
-    requiredPoints: 30
-  });
+  // チーム共通のご褒美ゴール設定
+  const [teamGoal, setTeamGoal] = useState<TeamGoal | null>(null);
+  
+  // 後方互換性のためのrewardGoal（計算用）
+  const rewardGoal = {
+    title: teamGoal?.title || 'カフェタイム',
+    description: teamGoal?.description || 'お気に入りのカフェで読書',
+    requiredPoints: teamGoal?.required_points || 30
+  };
 
   // 編集用の一時状態
   const [editGoalTitle, setEditGoalTitle] = useState('');
@@ -134,11 +138,6 @@ export default function DashboardDemoPage() {
 
   // ページロード時にゴール設定とポイントデータを読み込み
   useEffect(() => {
-    const savedGoal = localStorage.getItem('heartfelt-reward-goal');
-    if (savedGoal) {
-      setRewardGoal(JSON.parse(savedGoal));
-    }
-
     const savedPoints = localStorage.getItem('heartfelt-demo-points');
     if (savedPoints) {
       setMockData(JSON.parse(savedPoints));
@@ -155,6 +154,9 @@ export default function DashboardDemoPage() {
     
     // 意気込みデータを読み込み
     loadMotivations();
+    
+    // チームゴールデータを読み込み
+    loadTeamGoal();
   }, []);
 
   const loadUsers = async () => {
@@ -213,6 +215,25 @@ export default function DashboardDemoPage() {
       }
     } catch (error) {
       console.error('Failed to load motivations:', error);
+    }
+  };
+
+  const loadTeamGoal = async () => {
+    try {
+      const result = await getTeamGoal();
+      if (result.success) {
+        if (result.data) {
+          setTeamGoal(result.data);
+        } else {
+          // デフォルトゴールを作成
+          const defaultResult = await createDefaultTeamGoal();
+          if (defaultResult.success && defaultResult.data) {
+            setTeamGoal(defaultResult.data);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load team goal:', error);
     }
   };
 
@@ -325,7 +346,7 @@ export default function DashboardDemoPage() {
 
   const openGoalEditModal = () => {
     setEditGoalTitle(rewardGoal.title);
-    setEditGoalDescription(rewardGoal.description);
+    setEditGoalDescription(rewardGoal.description || '');
     setEditGoalPoints(rewardGoal.requiredPoints);
     setShowGoalEditModal(true);
   };
@@ -372,43 +393,49 @@ export default function DashboardDemoPage() {
     }
   };
 
-  const handleSaveGoal = () => {
+  const handleSaveGoal = async () => {
     if (!editGoalTitle.trim()) return;
 
-    const newGoal = {
-      title: editGoalTitle,
-      description: editGoalDescription,
-      requiredPoints: editGoalPoints
-    };
-
-    // ご褒美の内容（タイトル）が変更された場合のみ進捗をリセット
-    const isContentChanged = rewardGoal.title !== newGoal.title;
-    
-    if (isContentChanged && (mockData.thanksPoints > 0 || mockData.honestyPoints > 0)) {
-      const shouldReset = confirm('ご褒美の内容を変更すると、現在の進捗がリセットされます。\n続行しますか？');
+    try {
+      // チーム共通のゴールとして保存
+      const result = await saveTeamGoal(editGoalTitle, editGoalDescription, editGoalPoints);
       
-      if (shouldReset) {
-        // ポイントをリセット
-        setMockData({
-          thanksPoints: 0,
-          honestyPoints: 0
-        });
+      if (result.success && result.data) {
+        // ご褒美の内容（タイトル）が変更された場合のみ進捗をリセット
+        const isContentChanged = rewardGoal.title !== editGoalTitle;
         
-        // ローカルストレージからもポイントデータを削除
-        localStorage.removeItem('heartfelt-demo-points');
-      } else {
-        return; // キャンセルされた場合は何もしない
-      }
-    }
+        if (isContentChanged && (mockData.thanksPoints > 0 || mockData.honestyPoints > 0)) {
+          const shouldReset = confirm('ご褒美の内容を変更すると、現在の進捗がリセットされます。\n続行しますか？');
+          
+          if (shouldReset) {
+            // ポイントをリセット
+            setMockData({
+              thanksPoints: 0,
+              honestyPoints: 0
+            });
+            
+            // ローカルストレージからもポイントデータを削除
+            localStorage.removeItem('heartfelt-demo-points');
+          } else {
+            return; // キャンセルされた場合は何もしない
+          }
+        }
 
-    setRewardGoal(newGoal);
-    localStorage.setItem('heartfelt-reward-goal', JSON.stringify(newGoal));
-    closeGoalEditModal();
-    
-    if (isContentChanged) {
-      alert('ご褒美の内容を変更し、進捗を0からスタートしました！');
-    } else {
-      alert('ご褒美ゴールを更新しました！');
+        // 状態を更新
+        setTeamGoal(result.data);
+        closeGoalEditModal();
+        
+        if (isContentChanged) {
+          alert('ご褒美の内容を変更し、進捗を0からスタートしました！');
+        } else {
+          alert('ご褒美ゴールを更新しました！');
+        }
+      } else {
+        alert(`保存に失敗しました: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('チームゴール保存中にエラー:', error);
+      alert('チームゴールの保存中にエラーが発生しました');
     }
   };
 
@@ -911,6 +938,11 @@ export default function DashboardDemoPage() {
               <h1 className="text-white text-xl font-bold tracking-wide">
                 ご褒美ゴール：{rewardGoal.title}
               </h1>
+              {teamGoal && (
+                <p className="text-emerald-300 text-xs mt-1 opacity-60">
+                  by {teamGoal.updated_by_name}
+                </p>
+              )}
               {motivations.length > 0 && (
                 <div key={currentMotivationIndex} className="motivation-fade-in mt-2">
                   <p className="text-emerald-100 text-sm">
