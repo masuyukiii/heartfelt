@@ -1075,7 +1075,7 @@ export default function ProtectedPage() {
             <div className="bg-gradient-to-b from-sky-50 to-emerald-50 rounded-xl p-3 mb-2 relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-transparent"></div>
               <div className="relative z-10 text-center">
-                <div className="mb-1 filter drop-shadow-lg animate-pulse">
+                <div className="filter drop-shadow-lg animate-pulse">
                   {(() => {
                     const iconPath = getGrowthStageIcon(totalPoints, rewardGoal.requiredPoints);
                     // 画像パスの場合はimgタグ、絵文字の場合はそのまま表示
@@ -1084,14 +1084,14 @@ export default function ProtectedPage() {
                         <img 
                           src={iconPath} 
                           alt="成長ステージ" 
-                          className="w-full h-96 mx-auto object-cover"
+                          className="w-96 h-96 mx-auto object-contain"
                         />
                       );
                     }
                     return <span className="text-3xl">{iconPath}</span>;
                   })()}
                 </div>
-                <p className="text-emerald-700 font-medium text-xs whitespace-pre-line mb-1">
+                <p className="text-emerald-700 font-medium text-xs whitespace-pre-line">
                   {getGrowthMessage(totalPoints, rewardGoal.requiredPoints)}
                 </p>
                 <div className="inline-flex items-center bg-white/60 backdrop-blur-sm px-2 py-1 rounded-full mb-1">
