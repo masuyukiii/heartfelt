@@ -913,7 +913,7 @@ export default function DashboardDemoPage() {
         <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
           
           {/* ヘッダー - ご褒美ゴール */}
-          <div className="bg-gradient-to-r from-emerald-500 to-teal-500 px-6 py-4 text-center relative overflow-hidden">
+          <div className="bg-gradient-to-r from-emerald-500 to-teal-500 px-4 py-3 text-center relative overflow-hidden">
             <div className="absolute inset-0 bg-white/10"></div>
             <div className="absolute top-2 right-2 flex space-x-1">
               <button
@@ -932,10 +932,10 @@ export default function DashboardDemoPage() {
               </button>
             </div>
             <div className="relative z-10">
-              <div className="inline-flex items-center justify-center w-10 h-10 bg-white/20 rounded-full mb-2">
-                <span className="text-2xl">🎯</span>
+              <div className="inline-flex items-center justify-center w-8 h-8 bg-white/20 rounded-full mb-1">
+                <span className="text-lg">🎯</span>
               </div>
-              <h1 className="text-white text-xl font-bold tracking-wide">
+              <h1 className="text-white text-lg font-bold tracking-wide">
                 ご褒美ゴール：{rewardGoal.title}
               </h1>
               {motivations.length > 0 && (
@@ -949,10 +949,10 @@ export default function DashboardDemoPage() {
           </div>
 
           {/* 進捗エリア */}
-          <div className="px-4 py-4 bg-gradient-to-b from-white to-gray-50">
+          <div className="px-4 py-3 bg-gradient-to-b from-white to-gray-50">
             
             {/* 進捗バー */}
-            <div className="mb-4">
+            <div className="mb-3">
               <div className="flex justify-between items-center mb-2">
                 <span className="text-sm font-medium text-gray-600">進捗状況</span>
                 <span className="text-sm font-bold text-gray-800">{totalPoints} / {rewardGoal.requiredPoints}</span>
@@ -966,7 +966,7 @@ export default function DashboardDemoPage() {
             </div>
 
             {/* 達成メッセージ */}
-            <div className="text-center mb-4">
+            <div className="text-center mb-3">
               {remainingPoints > 0 ? (
                 <div className="space-y-2">
                   <p className="text-gray-600 text-sm">達成まで</p>
@@ -983,21 +983,21 @@ export default function DashboardDemoPage() {
             </div>
 
             {/* 植物エリア */}
-            <div className="bg-gradient-to-b from-sky-50 to-emerald-50 rounded-xl p-4 mb-3 relative overflow-hidden">
+            <div className="bg-gradient-to-b from-sky-50 to-emerald-50 rounded-xl p-3 mb-2 relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-transparent"></div>
               <div className="relative z-10 text-center">
-                <div className="text-4xl mb-2 filter drop-shadow-lg animate-pulse">
+                <div className="text-3xl mb-1 filter drop-shadow-lg animate-pulse">
                   {getGrowthStageIcon(totalPoints, rewardGoal.requiredPoints)}
                 </div>
-                <p className="text-emerald-700 font-medium text-xs whitespace-pre-line mb-2">
+                <p className="text-emerald-700 font-medium text-xs whitespace-pre-line mb-1">
                   {getGrowthMessage(totalPoints, rewardGoal.requiredPoints)}
                 </p>
-                <div className="inline-flex items-center bg-white/60 backdrop-blur-sm px-2 py-1 rounded-full mb-2">
+                <div className="inline-flex items-center bg-white/60 backdrop-blur-sm px-2 py-1 rounded-full mb-1">
                   <span className="text-xs text-gray-600">現在 {totalPoints} ポイント</span>
                 </div>
                 
                 {/* ポイント詳細（植物エリア内に統合） */}
-                <div className="grid grid-cols-2 gap-2 mt-2">
+                <div className="grid grid-cols-2 gap-2 mt-1">
                   <div className="bg-white/40 backdrop-blur-sm rounded-lg p-2 text-center border border-pink-200/50">
                     <div className="text-sm mb-1">💖</div>
                     <div className="text-sm font-bold text-pink-600">{mockData.thanksPoints}</div>
@@ -1014,11 +1014,11 @@ export default function DashboardDemoPage() {
           </div>
 
           {/* アクションボタン */}
-          <div className="p-4 bg-gray-50">
-            <div className="grid grid-cols-2 gap-4 mb-4">
+          <div className="p-3 bg-gray-50">
+            <div className="grid grid-cols-2 gap-3 mb-3">
               <button 
                 onClick={openThanksModal}
-                className="group bg-gradient-to-r from-pink-500 to-rose-500 text-white p-4 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 active:scale-95"
+                className="group bg-gradient-to-r from-pink-500 to-rose-500 text-white p-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 active:scale-95"
               >
                 <div className="text-2xl mb-2 group-hover:scale-110 transition-transform duration-200">💖</div>
                 <div className="text-sm font-semibold">ありがとう<br />を送る</div>
@@ -1026,7 +1026,7 @@ export default function DashboardDemoPage() {
               
               <button 
                 onClick={openHonestyModal}
-                className="group bg-gradient-to-r from-blue-500 to-indigo-500 text-white p-4 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 active:scale-95"
+                className="group bg-gradient-to-r from-blue-500 to-indigo-500 text-white p-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 active:scale-95"
               >
                 <div className="text-2xl mb-2 group-hover:scale-110 transition-transform duration-200">💭</div>
                 <div className="text-sm font-semibold">本音を<br />送る</div>
