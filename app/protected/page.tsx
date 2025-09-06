@@ -93,14 +93,12 @@ export default function ProtectedPage() {
     name: 'あなたの名前',
     department: 'あなたの部署',
     bio: 'よろしくお願いします！',
-    slackWebhookUrl: ''
   });
 
   // プロフィール編集用の一時状態
   const [editProfileName, setEditProfileName] = useState('');
   const [editProfileDepartment, setEditProfileDepartment] = useState('');
   const [editProfileBio, setEditProfileBio] = useState('');
-  const [editProfileSlackWebhookUrl, setEditProfileSlackWebhookUrl] = useState('');
 
   const totalPoints = mockData.thanksPoints + mockData.honestyPoints;
   const remainingPoints = Math.max(rewardGoal.requiredPoints - totalPoints, 0);
@@ -182,7 +180,6 @@ export default function ProtectedPage() {
           name: profile.name || 'あなたの名前',
           department: profile.department || 'あなたの部署',
           bio: 'よろしくお願いします！', // bioは使っていないのでデフォルト値
-          slackWebhookUrl: profile.slack_webhook_url || ''
         });
       }
     } catch (error) {
@@ -352,7 +349,6 @@ export default function ProtectedPage() {
     setEditProfileName(profileData.name);
     setEditProfileDepartment(profileData.department);
     setEditProfileBio(profileData.bio);
-    setEditProfileSlackWebhookUrl(profileData.slackWebhookUrl);
     setShowProfileEditModal(true);
   };
 
@@ -361,15 +357,13 @@ export default function ProtectedPage() {
     setEditProfileName('');
     setEditProfileDepartment('');
     setEditProfileBio('');
-    setEditProfileSlackWebhookUrl('');
   };
 
   const handleSaveProfile = async () => {
     try {
       const result = await updateProfile({
         name: editProfileName || 'あなたの名前',
-        department: editProfileDepartment || 'あなたの部署',
-        slackWebhookUrl: editProfileSlackWebhookUrl
+        department: editProfileDepartment || 'あなたの部署'
       });
 
       if (result.success) {
@@ -378,8 +372,7 @@ export default function ProtectedPage() {
           ...prev,
           name: editProfileName || prev.name,
           department: editProfileDepartment || prev.department,
-          bio: editProfileBio || prev.bio,
-          slackWebhookUrl: editProfileSlackWebhookUrl
+          bio: editProfileBio || prev.bio
         }));
         closeProfileEditModal();
         alert('プロフィール情報を更新しました！');
@@ -1459,47 +1452,6 @@ export default function ProtectedPage() {
                   <div className="text-xs text-gray-500 mt-1">{editProfileBio.length}/200文字</div>
                 </div>
 
-                {/* Slack Webhook URL */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3">
-                    💬 Slack通知設定（オプション）
-                  </label>
-                  
-                  {/* ワンクリック連携ボタン */}
-                  <div className="mb-4">
-                    <button
-                      onClick={() => window.open('/api/slack-auth', '_blank')}
-                      className="w-full p-4 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl hover:from-purple-700 hover:to-purple-800 transition-all duration-200 flex items-center justify-center space-x-2 font-medium"
-                    >
-                      <span>🚀</span>
-                      <span>ワンクリックでSlackと連携</span>
-                    </button>
-                    <p className="text-xs text-gray-500 mt-2">
-                      ↑ このボタンをクリックすると自動的にあなたのSlack DMに通知が設定されます
-                    </p>
-                  </div>
-
-                  {/* 手動設定 */}
-                  <div className="border-t pt-4">
-                    <p className="text-sm text-gray-600 mb-3">手動で設定する場合：</p>
-                    <input
-                      type="url"
-                      value={editProfileSlackWebhookUrl}
-                      onChange={(e) => setEditProfileSlackWebhookUrl(e.target.value)}
-                      placeholder="https://hooks.slack.com/services/..."
-                      className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-gray-500 focus:outline-none transition-colors duration-200"
-                    />
-                    <div className="text-xs text-gray-500 mt-2">
-                      <p>Slack Webhook URLを設定すると、メッセージ受信時にSlackに通知が届きます</p>
-                      <p className="mt-1">
-                        <span className="font-medium">設定方法:</span> 
-                        <a href="https://api.slack.com/messaging/webhooks" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline ml-1">
-                          Slack Webhookガイド
-                        </a>
-                      </p>
-                    </div>
-                  </div>
-                </div>
 
                 {/* 保存ボタン */}
                 <button
