@@ -81,14 +81,13 @@ export default function DashboardDemoPage() {
   const [messageError, setMessageError] = useState<string | null>(null);
   const [messageFilter, setMessageFilter] = useState<'unread' | 'all' | 'thanks' | 'honesty'>('all');
 
-  // 意気込み機能の状態
-  const [motivations, setMotivations] = useState([
-    { id: 1, name: '田中', content: '美味しいランチが食べたーい！', timestamp: new Date() },
-    { id: 2, name: '佐藤', content: '今度こそスパでリラックスしたい', timestamp: new Date() },
-    { id: 3, name: '鈴木', content: '憧れの温泉旅館に泊まってみたい！', timestamp: new Date() },
-    { id: 4, name: '山田', content: 'おしゃれなカフェでまったりしたい', timestamp: new Date() },
-    { id: 5, name: '高橋', content: '友達と豪華ディナーを楽しみたい', timestamp: new Date() }
-  ]);
+  // 意気込み機能の状態（初期値は空配列）
+  const [motivations, setMotivations] = useState<Array<{
+    id: number;
+    name: string;
+    content: string;
+    timestamp: Date;
+  }>>([]);
   const [isMotivationModalOpen, setIsMotivationModalOpen] = useState(false);
   const [newMotivationName, setNewMotivationName] = useState('');
   const [newMotivationContent, setNewMotivationContent] = useState('');
@@ -887,12 +886,16 @@ export default function DashboardDemoPage() {
               <h1 className="text-white text-xl font-bold tracking-wide">
                 ご褒美ゴール：{rewardGoal.title}
               </h1>
-              {motivations.length > 0 && (
+              {motivations.length > 0 ? (
                 <div key={currentMotivationIndex} className="motivation-fade-in mt-2">
                   <p className="text-emerald-100 text-sm">
                     {motivations[currentMotivationIndex]?.name}：{motivations[currentMotivationIndex]?.content}
                   </p>
                 </div>
+              ) : (
+                <p className="text-emerald-200 text-xs mt-1 opacity-80">
+                  みんなの意気込みを追加してください
+                </p>
               )}
             </div>
           </div>
