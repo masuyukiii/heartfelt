@@ -891,21 +891,13 @@ export default function DashboardDemoPage() {
               <h1 className="text-white text-xl font-bold tracking-wide">
                 ご褒美ゴール：{rewardGoal.title}
               </h1>
-              {(() => {
-                // 他の人の意気込みだけをフィルタリング
-                const othersMotivations = motivations.filter(m => !m.isOwn);
-                if (othersMotivations.length > 0) {
-                  const currentOtherIndex = currentMotivationIndex % othersMotivations.length;
-                  return (
-                    <div key={currentMotivationIndex} className="motivation-fade-in mt-2">
-                      <p className="text-emerald-100 text-sm">
-                        {othersMotivations[currentOtherIndex]?.name}：{othersMotivations[currentOtherIndex]?.content}
-                      </p>
-                    </div>
-                  );
-                }
-                return null;
-              })()}
+              {motivations.length > 0 && (
+                <div key={currentMotivationIndex} className="motivation-fade-in mt-2">
+                  <p className="text-emerald-100 text-sm">
+                    {motivations[currentMotivationIndex]?.name}：{motivations[currentMotivationIndex]?.content}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
