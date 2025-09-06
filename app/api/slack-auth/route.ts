@@ -53,4 +53,4 @@ export async function GET(request: NextRequest) {
     console.error('Slack auth error:', error)
     return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/protected?slack_error=1`)
   }
-}
+}// Force update 2025年 9月 7日 日曜日 03時20分55秒 JST
