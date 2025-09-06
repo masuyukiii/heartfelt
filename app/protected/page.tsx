@@ -3,9 +3,9 @@
 import { useState, useEffect } from 'react';
 import { createClient } from "@/lib/supabase/client";
 import { getUsers, type User } from '@/lib/supabase/users';
-import { getReceivedMessages, markAsRead, sendMessage, getTeamPoints, deleteMessage, type Message } from '@/lib/supabase/message-actions';
+import { getReceivedMessages, markAsRead, sendMessage, deleteMessage, type Message } from '@/lib/supabase/message-actions';
 import { saveToLibrary } from '@/lib/supabase/word-library-actions';
-import { getActiveGoal, createNewGoal, getCurrentGoalProgress, achieveGoal, type RewardGoal } from '@/lib/supabase/reward-goal-actions';
+import { getActiveGoal, createNewGoal, getCurrentGoalProgress } from '@/lib/supabase/reward-goal-actions';
 import { updateProfile, getCurrentUserProfile } from '@/lib/supabase/profile-actions';
 import { saveMotivation, getAllMotivations, getMyMotivation, type Motivation } from '@/lib/supabase/motivation-actions';
 import { saveTeamGoal, getTeamGoal, createDefaultTeamGoal, type TeamGoal } from '@/lib/supabase/team-goal-actions';
