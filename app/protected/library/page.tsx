@@ -153,7 +153,7 @@ export default function LibraryPage() {
         <div className="absolute top-1/3 left-1/2 text-4xl">☁️</div>
       </div>
 
-      <div className="max-w-md mx-auto space-y-4 relative z-10">
+      <div className="max-w-md mx-auto p-4 space-y-4 relative z-10">
         {/* ヘッダー */}
         <div className="text-center">
           <div className="flex items-center justify-center mb-2">
