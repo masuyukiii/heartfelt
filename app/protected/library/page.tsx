@@ -179,29 +179,6 @@ export default function LibraryPage() {
           </button>
         </div>
 
-        {/* 統計情報 */}
-        <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg p-6">
-          <h3 className="text-lg font-semibold mb-4 text-gray-800">
-            📊 保存した言葉の統計
-          </h3>
-          <div className="grid grid-cols-3 gap-4">
-            <div className="text-center p-4 bg-gradient-to-br from-green-50 to-emerald-100 rounded-xl border border-green-200">
-              <div className="text-2xl mb-2">💚</div>
-              <div className="text-sm text-gray-600">ありがとう</div>
-              <div className="font-bold text-green-600">{stats.thanksCount}個</div>
-            </div>
-            <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-sky-100 rounded-xl border border-blue-200">
-              <div className="text-2xl mb-2">💭</div>
-              <div className="text-sm text-gray-600">本音</div>
-              <div className="font-bold text-blue-600">{stats.honestyCount}個</div>
-            </div>
-            <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-indigo-100 rounded-xl border border-purple-200">
-              <div className="text-2xl mb-2">☁️</div>
-              <div className="text-sm text-gray-600">合計</div>
-              <div className="font-bold text-purple-600">{stats.thanksCount + stats.honestyCount}個</div>
-            </div>
-          </div>
-        </div>
 
         {/* フィルター */}
         <div className="flex bg-white/70 backdrop-blur-sm rounded-lg p-1 shadow-sm">
@@ -260,34 +237,32 @@ export default function LibraryPage() {
             {filteredWords.map((word) => (
               <div
                 key={word.id}
-                className={`relative rounded-xl shadow-md p-4 transition-all duration-300 cursor-pointer hover:shadow-lg hover:scale-105 ${
-                  word.message_type === 'thanks' 
-                    ? 'bg-gradient-to-br from-green-50/50 via-emerald-50/30 to-teal-50/20 border border-green-100/50' 
-                    : 'bg-gradient-to-br from-blue-50/50 via-sky-50/30 to-indigo-50/20 border border-blue-100/50'
-                }`}
+                className="relative rounded-2xl transition-all duration-300 cursor-pointer hover:shadow-xl hover:scale-105 aspect-square"
                 onClick={() => setSelectedWord(word)}
                 style={{
                   background: word.message_type === 'thanks' 
-                    ? 'linear-gradient(135deg, rgba(240, 253, 244, 0.8), rgba(236, 252, 248, 0.6))'
-                    : 'linear-gradient(135deg, rgba(239, 246, 255, 0.8), rgba(238, 242, 255, 0.6))',
-                  backdropFilter: 'blur(10px)'
+                    ? 'linear-gradient(145deg, #f0fdf4, #dcfce7)'
+                    : 'linear-gradient(145deg, #eff6ff, #dbeafe)',
+                  boxShadow: '4px 4px 8px rgba(0,0,0,0.1), -2px -2px 6px rgba(255,255,255,0.9)',
+                  border: '1px solid rgba(255,255,255,0.5)'
                 }}
               >
-                <div className="text-center mb-2">
-                  <span className="text-2xl">
-                    {word.message_type === 'thanks' ? '💚' : '💭'}
-                  </span>
+                <div className="flex flex-col items-center justify-center h-full p-4">
+                  <div className="mb-3">
+                    <span className="text-3xl">
+                      {word.message_type === 'thanks' ? '💚' : '💭'}
+                    </span>
+                  </div>
+                  
+                  <div className="text-center">
+                    <p className="text-sm text-gray-700 font-medium">
+                      {word.message_type === 'thanks' ? 'ありがとう' : '本音'}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {filteredWords.filter(w => w.message_type === word.message_type).findIndex(w => w.id === word.id) + 1}個
+                    </p>
+                  </div>
                 </div>
-                
-                <div className="text-center mb-3">
-                  <span className="text-xs font-medium text-gray-500">
-                    {word.original_sender_name || '匿名'}
-                  </span>
-                </div>
-                
-                <p className="text-xs text-gray-600 text-center line-clamp-4 leading-relaxed">
-                  {word.message_content}
-                </p>
               </div>
             ))}
           </div>
