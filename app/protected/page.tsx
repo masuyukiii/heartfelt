@@ -1072,7 +1072,7 @@ export default function ProtectedPage() {
             </div>
 
             {/* 植物エリア */}
-            <div className="bg-gradient-to-b from-sky-50 to-emerald-50 rounded-xl p-3 mb-2 relative overflow-hidden">
+            <div className="bg-gradient-to-b from-sky-50 to-emerald-50 rounded-xl p-1 mb-2 relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-transparent"></div>
               <div className="relative z-10 text-center">
                 <div className="filter drop-shadow-lg">
