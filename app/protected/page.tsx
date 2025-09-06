@@ -915,20 +915,25 @@ export default function ProtectedPage() {
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  console.log('Button click event triggered');
+                  console.log('Profile edit button clicked');
                   openProfileEditModal();
                 }}
-                className="text-white hover:bg-white/30 hover:scale-110 rounded-full p-3 transition-all duration-200 cursor-pointer select-none relative z-50"
+                className="text-white hover:bg-white/30 hover:scale-110 rounded-full p-2 transition-all duration-200 cursor-pointer select-none relative z-50 flex items-center justify-center min-w-[44px] min-h-[44px]"
                 title="プロフィールを編集"
               >
-                <span className="text-lg">👤</span>
+                <span className="text-xl leading-none pointer-events-none">👤</span>
               </button>
               <button
-                onClick={openGoalEditModal}
-                className="text-white hover:bg-white/30 hover:scale-110 rounded-full p-3 transition-all duration-200 cursor-pointer select-none"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  console.log('Goal edit button clicked');
+                  openGoalEditModal();
+                }}
+                className="text-white hover:bg-white/30 hover:scale-110 rounded-full p-2 transition-all duration-200 cursor-pointer select-none relative z-50 flex items-center justify-center min-w-[44px] min-h-[44px]"
                 title="ご褒美ゴールを編集"
               >
-                <span className="text-lg">✏️</span>
+                <span className="text-xl leading-none pointer-events-none">✏️</span>
               </button>
             </div>
             <div className="relative z-10">
