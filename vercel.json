@@ -5,8 +5,11 @@
     }
   },
   "framework": "nextjs",
-  "buildCommand": "npm run build",
+  "buildCommand": "rm -rf .next && npm run build",
   "devCommand": "npm run dev",
-  "installCommand": "npm install",
-  "outputDirectory": ".next"
+  "installCommand": "npm install --force",
+  "outputDirectory": ".next",
+  "github": {
+    "silent": false
+  }
 }
