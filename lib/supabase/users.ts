@@ -13,19 +13,37 @@ export async function getUsers(): Promise<User[]> {
   const supabase = createClient()
   
   try {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .order('created_at', { ascending: true })
+    // まずauth.usersからユーザー一覧を取得してみる
+    const { data: authData, error: authError } = await supabase.auth.admin.listUsers()
+    
+    if (authError || !authData) {
+      console.log('Auth users not accessible, trying profiles table...')
+      
+      // profilesテーブルからの取得を試行
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: true })
 
-    if (error) {
-      console.error('Failed to fetch users:', error)
-      return []
+      if (error) {
+        console.log('Profiles table not found or empty, returning empty array')
+        return []
+      }
+
+      return data || []
     }
 
-    return data || []
+    // auth.usersが利用可能な場合はそちらを使用
+    return authData.users.map(user => ({
+      id: user.id,
+      email: user.email || '',
+      name: user.user_metadata?.name || user.email?.split('@')[0] || '匿名ユーザー',
+      department: user.user_metadata?.department,
+      avatar_url: user.user_metadata?.avatar_url,
+      created_at: user.created_at
+    }))
   } catch (error) {
-    console.error('Error fetching users:', error)
+    console.log('Error fetching users, returning empty array:', error)
     return []
   }
 }
