@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { getUsers, type User } from '@/lib/supabase/users';
 import { getReceivedMessages, markAsRead, sendMessage, getTeamPoints, deleteMessage, type Message } from '@/lib/supabase/message-actions';
 import { saveToLibrary } from '@/lib/supabase/word-library-actions';
+import { getActiveGoal, createNewGoal, getCurrentGoalProgress, achieveGoal, type RewardGoal } from '@/lib/supabase/reward-goal-actions';
 import { updateProfile, getCurrentUserProfile } from '@/lib/supabase/profile-actions';
 import { saveMotivation, getAllMotivations, getMyMotivation, type Motivation } from '@/lib/supabase/motivation-actions';
 import { saveTeamGoal, getTeamGoal, createDefaultTeamGoal, type TeamGoal } from '@/lib/supabase/team-goal-actions';
@@ -78,12 +79,11 @@ export default function ProtectedPage() {
   // チーム共通のご褒美ゴール設定
   const [teamGoal, setTeamGoal] = useState<TeamGoal | null>(null);
   
-  // 後方互換性のためのrewardGoal（計算用）
-  const rewardGoal = {
-    title: teamGoal?.title || 'カフェタイム',
-    description: teamGoal?.description || 'お気に入りのカフェで読書',
-    requiredPoints: teamGoal?.required_points || 30
-  };
+  // ご褒美ゴールの状態管理
+  const [rewardGoal, setRewardGoal] = useState({
+    name: 'カフェタイム',
+    requiredPoints: 30
+  });
 
   // 編集用の一時状態
   const [editGoalTitle, setEditGoalTitle] = useState('');
@@ -144,18 +144,19 @@ export default function ProtectedPage() {
   const loadTeamPoints = async () => {
     setIsLoadingTeamPoints(true);
     try {
-      const result = await getTeamPoints();
-      if (result.success) {
-        setTeamPoints({
-          thanksPoints: result.thanksPoints,
-          honestyPoints: result.honestyPoints,
-        });
-      } else {
-        console.error('Failed to load team points:', result.error);
-        // エラー時はデフォルト値を使用
-        setTeamPoints({
-          thanksPoints: 0,
-          honestyPoints: 0,
+      // 現在のゴールの進捗を取得（ゴール開始日以降のメッセージのみカウント）
+      const progress = await getCurrentGoalProgress();
+      setTeamPoints({
+        thanksPoints: progress.thanksPoints,
+        honestyPoints: progress.honestyPoints,
+      });
+      
+      // アクティブなゴールを取得
+      const goal = await getActiveGoal();
+      if (goal) {
+        setRewardGoal({
+          name: goal.goal_name,
+          requiredPoints: goal.required_points,
         });
       }
     } catch (error) {
@@ -407,8 +408,8 @@ export default function ProtectedPage() {
   };
 
   const openGoalEditModal = () => {
-    setEditGoalTitle(rewardGoal.title);
-    setEditGoalDescription(rewardGoal.description || '');
+    setEditGoalTitle(rewardGoal.name);
+    setEditGoalDescription('');
     setEditGoalPoints(rewardGoal.requiredPoints);
     setShowGoalEditModal(true);
   };
@@ -466,36 +467,32 @@ export default function ProtectedPage() {
     if (!editGoalTitle.trim()) return;
 
     try {
-      // チーム共通のゴールとして保存
-      const result = await saveTeamGoal(editGoalTitle, editGoalDescription, editGoalPoints);
+      // 新しいゴールを作成（常にカウントをリセット）
+      const result = await createNewGoal({
+        goalName: editGoalTitle,
+        requiredPoints: editGoalPoints
+      });
       
-      if (result.success && result.data) {
-        // ご褒美の内容（タイトル）が変更された場合のみ進捗をリセット
-        const isContentChanged = rewardGoal.title !== editGoalTitle;
+      if (result.success) {
+        // ゴールを更新
+        setRewardGoal({
+          name: editGoalTitle,
+          requiredPoints: editGoalPoints
+        });
         
-        if (isContentChanged && (teamPoints.thanksPoints > 0 || teamPoints.honestyPoints > 0)) {
-          const shouldReset = confirm('ご褒美の内容を変更すると、現在の進捗がリセットされます。\n続行しますか？');
-          
-          if (shouldReset) {
-            // ポイントをリセット
-            setTeamPoints({
-              thanksPoints: 0,
-              honestyPoints: 0
-            });
-          } else {
-            return; // キャンセルされた場合は何もしない
+        // ポイントをリセット（新しいゴールの開始）
+        await loadTeamPoints(); // ポイントを再読み込み（自動的に0になる）
+        
+        // チームゴールも更新
+        if (teamGoal) {
+          const goalResult = await saveTeamGoal(editGoalTitle, editGoalDescription, editGoalPoints);
+          if (goalResult.success && goalResult.data) {
+            setTeamGoal(goalResult.data);
           }
         }
-
-        // 状態を更新
-        setTeamGoal(result.data);
-        closeGoalEditModal();
         
-        if (isContentChanged) {
-          alert('ご褒美の内容を変更し、進捗を0からスタートしました！');
-        } else {
-          alert('ご褒美ゴールを更新しました！');
-        }
+        closeGoalEditModal();
+        alert('新しいご褒美ゴールを設定しました！\nカウントを0からスタートします！');
       } else {
         alert(`保存に失敗しました: ${result.error}`);
       }
@@ -1034,7 +1031,7 @@ export default function ProtectedPage() {
                 <span className="text-lg">🎯</span>
               </div>
               <h1 className="text-white text-lg font-bold tracking-wide">
-                ご褒美ゴール：{rewardGoal.title}
+                ご褒美ゴール：{rewardGoal.name}
               </h1>
               {motivations.length > 0 && (
                 <div key={currentMotivationIndex} className="motivation-fade-in mt-2">
@@ -1613,16 +1610,9 @@ export default function ProtectedPage() {
                   <div className="text-xs text-gray-500 mt-1">
                     現在のポイント: {totalPoints}pt（あと{Math.max(editGoalPoints - totalPoints, 0)}pt で達成）
                   </div>
-                  {rewardGoal.title !== editGoalTitle && totalPoints > 0 && (
-                    <div className="text-xs text-orange-600 bg-orange-50 p-2 rounded mt-2">
-                      ⚠️ ご褒美の内容を変更すると現在の進捗（{totalPoints}pt）がリセットされます
-                    </div>
-                  )}
-                  {rewardGoal.requiredPoints !== editGoalPoints && rewardGoal.title === editGoalTitle && (
-                    <div className="text-xs text-blue-600 bg-blue-50 p-2 rounded mt-2">
-                      ℹ️ 必要ポイント数のみ変更は進捗をリセットしません
-                    </div>
-                  )}
+                  <div className="text-xs text-orange-600 bg-orange-50 p-2 rounded mt-2">
+                    ⚠️ 新しいゴールを設定すると、カウントを0からスタートします
+                  </div>
                 </div>
 
                 {/* 自分の意気込み */}
