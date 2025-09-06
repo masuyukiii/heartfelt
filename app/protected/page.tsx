@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { createClient } from "@/lib/supabase/client";
 import { getUsers, type User } from '@/lib/supabase/users';
-import { getReceivedMessages, markAsRead, sendMessage, getTeamPoints, type Message } from '@/lib/supabase/message-actions';
+import { getReceivedMessages, markAsRead, sendMessage, getTeamPoints, deleteMessage, type Message } from '@/lib/supabase/message-actions';
+import { saveToLibrary } from '@/lib/supabase/word-library-actions';
 import { updateProfile, getCurrentUserProfile } from '@/lib/supabase/profile-actions';
 import { saveMotivation, getAllMotivations, getMyMotivation, type Motivation } from '@/lib/supabase/motivation-actions';
 import { saveTeamGoal, getTeamGoal, createDefaultTeamGoal, type TeamGoal } from '@/lib/supabase/team-goal-actions';
@@ -276,6 +277,48 @@ export default function ProtectedPage() {
     } catch (error) {
       console.error('Mark as read error:', error);
       alert('既読状態の更新中にエラーが発生しました');
+    }
+  };
+
+  const handleDeleteMessage = async (messageId: string) => {
+    if (!confirm('このメッセージを削除しますか？この操作は取り消すことができません。')) {
+      return;
+    }
+
+    try {
+      const result = await deleteMessage(messageId);
+      
+      if (result.success) {
+        // メッセージリストを再読み込み
+        await loadMessages();
+        alert('メッセージを削除しました');
+      } else {
+        console.error('Failed to delete message:', result.error);
+        alert(`メッセージの削除に失敗しました: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('Delete message error:', error);
+      alert('メッセージ削除中にエラーが発生しました');
+    }
+  };
+
+  const handleSaveToLibrary = async (message: Message) => {
+    try {
+      const result = await saveToLibrary({
+        messageContent: message.content,
+        messageType: message.type,
+        originalSenderName: message.sender_name
+      });
+      
+      if (result.success) {
+        alert('ことばライブラリに保存しました！');
+      } else {
+        console.error('Failed to save to library:', result.error);
+        alert(`ライブラリ保存に失敗しました: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('Save to library error:', error);
+      alert('ライブラリ保存中にエラーが発生しました');
     }
   };
 
@@ -827,16 +870,30 @@ export default function ProtectedPage() {
                       <span className="text-xs text-gray-500">
                         {formatTimeAgo(new Date(message.created_at))}
                       </span>
-                      {!message.is_read && (
-                        <div className="mt-1">
+                      <div className="mt-2 flex flex-col gap-1">
+                        {!message.is_read && (
                           <button
                             onClick={() => handleMarkAsRead(message.id)}
-                            className="text-xs bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
+                            className="text-xs bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 transition-colors"
                           >
                             既読にする
                           </button>
-                        </div>
-                      )}
+                        )}
+                        <button
+                          onClick={() => handleSaveToLibrary(message)}
+                          className="text-xs bg-purple-500 text-white px-2 py-1 rounded hover:bg-purple-600 transition-colors"
+                          title="ことばライブラリに保存"
+                        >
+                          📚 保存
+                        </button>
+                        <button
+                          onClick={() => handleDeleteMessage(message.id)}
+                          className="text-xs bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 transition-colors"
+                          title="メッセージを削除"
+                        >
+                          🗑️ 削除
+                        </button>
+                      </div>
                     </div>
                   </div>
                   
@@ -1082,10 +1139,12 @@ export default function ProtectedPage() {
                 )}
               </button>
               
-              <button className="group w-full bg-white border-2 border-gray-200 text-gray-400 p-3 rounded-xl cursor-not-allowed">
-                <div className="text-2xl mb-2">📚</div>
-                <div className="text-sm font-medium">ことば<br />ライブラリ</div>
-                <div className="text-xs text-gray-400 mt-1">準備中</div>
+              <button 
+                onClick={() => window.location.href = '/protected/library'}
+                className="group w-full bg-white border-2 border-gray-200 text-gray-700 p-3 rounded-xl hover:border-purple-300 hover:bg-purple-50 transition-all duration-200 hover:scale-105 active:scale-95"
+              >
+                <div className="text-2xl mb-2 group-hover:scale-110 transition-transform duration-200">📚</div>
+                <div className="text-sm font-semibold">ことば<br />ライブラリ</div>
               </button>
             </div>
           </div>

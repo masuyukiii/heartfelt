@@ -208,3 +208,44 @@ export async function markAsRead(messageId: string) {
     }
   }
 }
+
+// メッセージを削除
+export async function deleteMessage(messageId: string) {
+  const supabase = createClient()
+  
+  try {
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
+    
+    if (userError || !user) {
+      throw new Error('ユーザーが見つかりません')
+    }
+
+    // UUIDの妥当性をチェック
+    if (!messageId || typeof messageId !== 'string' || messageId.length !== 36) {
+      throw new Error('無効なメッセージIDです')
+    }
+
+    // 受信者本人のメッセージのみ削除可能にする
+    const { error } = await supabase
+      .from('messages')
+      .delete()
+      .eq('id', messageId)
+      .eq('recipient_id', user.id) // 重要：受信者本人のみ削除可能
+
+    if (error) {
+      console.error('Supabase delete message error:', error)
+      if (error.code === 'PGRST116' || error.message.includes('relation "messages" does not exist')) {
+        throw new Error('データベーステーブルが設定されていません。管理者にお問い合わせください。')
+      }
+      throw new Error(`メッセージ削除エラー: ${error.message}`)
+    }
+
+    return { success: true }
+  } catch (error) {
+    console.error('Delete message error:', error)
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : '不明なエラー' 
+    }
+  }
+}
