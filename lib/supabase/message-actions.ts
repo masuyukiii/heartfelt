@@ -1,5 +1,4 @@
 import { createClient } from '@/lib/supabase/client'
-import { getLineService } from '@/lib/line/line-client'
 
 export interface Message {
   id: string
@@ -22,7 +21,6 @@ export async function sendMessage(data: {
   recipientId: string
   type: 'thanks' | 'honesty'
   content: string
-  sendToLine?: boolean  // LINE送信オプション
 }) {
   const supabase = createClient()
   
@@ -43,7 +41,6 @@ export async function sendMessage(data: {
       throw new Error('メッセージ内容を入力してください')
     }
 
-    // メッセージをデータベースに保存
     const { error } = await supabase
       .from('messages')
       .insert({
@@ -59,41 +56,6 @@ export async function sendMessage(data: {
         throw new Error('データベーステーブルが設定されていません。管理者にお問い合わせください。')
       }
       throw new Error(`メッセージ送信エラー: ${error.message}`)
-    }
-
-    // LINE送信オプションが有効な場合
-    if (data.sendToLine) {
-      try {
-        // 送信者の情報を取得
-        const { data: senderProfile } = await supabase
-          .from('profiles')
-          .select('name, email')
-          .eq('id', user.id)
-          .single()
-
-        // 受信者のLINE情報を取得（将来的にはprofilesテーブルのline_user_idカラムから）
-        // 今回はデモ用に環境変数からLINE_USER_IDを取得
-        const recipientLineUserId = process.env.LINE_DEFAULT_USER_ID || data.recipientId
-
-        const lineService = getLineService()
-        if (lineService) {
-          const lineResult = await lineService.sendRichMessage({
-            userId: recipientLineUserId,
-            message: data.content.trim(),
-            senderName: senderProfile?.name || senderProfile?.email?.split('@')[0] || '匿名ユーザー',
-            messageType: data.type
-          })
-
-          if (!lineResult.success) {
-            console.warn('LINE送信に失敗しましたが、メッセージ送信は続行します:', lineResult.error)
-          }
-        } else {
-          console.warn('LINE設定が不完全です。LINE送信をスキップします。')
-        }
-      } catch (lineError) {
-        console.error('LINE送信中にエラーが発生しました:', lineError)
-        // LINEの送信エラーは致命的ではないため、処理を続行
-      }
     }
 
     return { success: true }

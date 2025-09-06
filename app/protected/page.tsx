@@ -73,9 +73,6 @@ export default function ProtectedPage() {
   const [selectedRelationship, setSelectedRelationship] = useState('');
   const [finalMessage, setFinalMessage] = useState('');
   
-  // LINE送信オプション
-  const [sendToLine, setSendToLine] = useState(false);
-  
   // AI添削機能用の状態
   const [showAIChat, setShowAIChat] = useState(false);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
@@ -351,7 +348,6 @@ export default function ProtectedPage() {
     setIsSubmitting(false);
     setSelectedRelationship('');
     setFinalMessage('');
-    setSendToLine(false);
   };
 
   const openGoalEditModal = () => {
@@ -626,8 +622,7 @@ export default function ProtectedPage() {
       const result = await sendMessage({
         recipientId: selectedRecipient,
         type: type,
-        content: messageContent.trim(),
-        sendToLine: sendToLine
+        content: messageContent.trim()
       });
       
       if (result.success) {
@@ -1379,24 +1374,6 @@ export default function ProtectedPage() {
                   />
                 </div>
 
-                {/* LINE送信オプション */}
-                <div className="border-t pt-4">
-                  <label className="flex items-center space-x-3">
-                    <input
-                      type="checkbox"
-                      checked={sendToLine}
-                      onChange={(e) => setSendToLine(e.target.checked)}
-                      className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 focus:ring-2"
-                    />
-                    <div className="flex items-center space-x-2">
-                      <span className="text-green-600 text-lg">📱</span>
-                      <span className="text-sm font-medium text-gray-700">LINEでも送信する</span>
-                    </div>
-                  </label>
-                  <p className="text-xs text-gray-500 mt-2 ml-7">
-                    チェックすると、受信BOXと同時にLINEにもメッセージが送信されます
-                  </p>
-                </div>
 
                 {/* 送信ボタン */}
                 <button
