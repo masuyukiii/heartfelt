@@ -63,12 +63,15 @@ export default function DashboardDemoPage() {
   const [selectedRecipient, setSelectedRecipient] = useState('');
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedRelationship, setSelectedRelationship] = useState('');
+  const [finalMessage, setFinalMessage] = useState('');
   
   // AI添削機能用の状態
   const [showAIChat, setShowAIChat] = useState(false);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [aiInput, setAiInput] = useState('');
   const [isAIProcessing, setIsAIProcessing] = useState(false);
+  const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
   
   // 受信BOX用の状態
   const [messages, setMessages] = useState<Message[]>([]);
@@ -251,6 +254,7 @@ export default function DashboardDemoPage() {
     setShowHonestyModal(true);
     setSelectedRecipient('');
     setMessage('');
+    setSelectedRelationship('');
     // モーダルを開くたびにユーザーリストを更新
     loadUsers();
   };
@@ -261,6 +265,8 @@ export default function DashboardDemoPage() {
     setSelectedRecipient('');
     setMessage('');
     setIsSubmitting(false);
+    setSelectedRelationship('');
+    setFinalMessage('');
   };
 
   const openGoalEditModal = () => {
@@ -359,7 +365,6 @@ export default function DashboardDemoPage() {
       return;
     }
     
-    setAiInput(message);
     setShowAIChat(true);
     setChatMessages([]);
     
@@ -373,19 +378,32 @@ export default function DashboardDemoPage() {
     setIsAIProcessing(true);
     
     try {
-      // ユーザーメッセージを追加（初回は既存のメッセージ内容）
-      const userMessage: ChatMessage = {
-        id: Date.now().toString(),
-        role: 'user',
-        content: isInitial ? `「${text}」という内容を相手にポジティブに伝えたいのですが、どう表現したらよいでしょうか？` : text,
-        timestamp: new Date()
-      };
+      // 選択された受信者の情報を取得
+      const recipient = selectedRecipient 
+        ? (users.length > 0 ? users : mockRecipients).find(r => r.id === selectedRecipient)
+        : null;
       
-      const updatedChatMessages = [...chatMessages, userMessage];
-      setChatMessages(updatedChatMessages);
+      const recipientInfo = recipient 
+        ? { name: recipient.name || '相手', department: recipient.department || '部署' }
+        : undefined;
       
-      // AI応答を取得
-      const response = await getAIFeedback(text, chatMessages);
+      let updatedChatMessages = [...chatMessages];
+      
+      // 初回でない場合のみユーザーメッセージを追加
+      if (!isInitial) {
+        const userMessage: ChatMessage = {
+          id: Date.now().toString(),
+          role: 'user',
+          content: text,
+          timestamp: new Date()
+        };
+        updatedChatMessages = [...chatMessages, userMessage];
+        setChatMessages(updatedChatMessages);
+      }
+      
+      // AI応答を取得（受信者情報と関係性を渡す）
+      const aiInputText = isInitial ? `「${text}」という内容を相手にポジティブに伝えたいのですが、どう表現したらよいでしょうか？` : text;
+      const response = await getAIFeedback(aiInputText, chatMessages, recipientInfo, selectedRelationship);
       
       if (response.success && response.message) {
         const aiMessage: ChatMessage = {
@@ -422,8 +440,34 @@ export default function DashboardDemoPage() {
     setAiInput('');
   };
 
+  // メッセージをクリップボードにコピーする関数
+  const copyToClipboard = async (text: string, messageId: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedMessageId(messageId);
+      setTimeout(() => setCopiedMessageId(null), 2000); // 2秒後にリセット
+    } catch (err) {
+      console.error('コピーに失敗しました:', err);
+    }
+  };
+
+  // メッセージから提案文章を抽出する関数
+  const extractMessageFromAI = (content: string): string | null => {
+    // 「」で囲まれたメッセージ部分を抽出
+    const messageMatch = content.match(/『([^』]+)』/s);
+    if (messageMatch) return messageMatch[1];
+    
+    // ---で囲まれたメッセージ部分を抽出
+    const dashMatch = content.match(/---\n([\s\S]+?)\n---/);
+    if (dashMatch) return dashMatch[1].trim();
+    
+    return null;
+  };
+
   const handleSubmit = async (type: 'thanks' | 'honesty') => {
-    if (!selectedRecipient || !message.trim()) return;
+    // 本音の場合はfinalMessage、ありがとうの場合はmessageを使用
+    const messageContent = type === 'honesty' ? finalMessage : message;
+    if (!selectedRecipient || !messageContent.trim()) return;
     
     setIsSubmitting(true);
     
@@ -432,7 +476,7 @@ export default function DashboardDemoPage() {
       const result = await sendMessage({
         recipientId: selectedRecipient,
         type: type,
-        content: message.trim()
+        content: messageContent.trim()
       });
       
       if (result.success) {
@@ -929,6 +973,36 @@ export default function DashboardDemoPage() {
                   )}
                 </div>
 
+                {/* 関係性選択 */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                    相手との関係性
+                  </label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { id: 'boss', label: '上司', emoji: '👔' },
+                      { id: 'colleague', label: '同僚', emoji: '🤝' },
+                      { id: 'subordinate', label: '部下', emoji: '🌱' },
+                      { id: 'lover', label: '恋人', emoji: '💕' },
+                      { id: 'friend', label: '友人', emoji: '😊' },
+                      { id: 'family', label: '家族', emoji: '👨‍👩‍👧‍👦' }
+                    ].map((relationship) => (
+                      <button
+                        key={relationship.id}
+                        onClick={() => setSelectedRelationship(relationship.id)}
+                        className={`p-3 rounded-lg border-2 transition-all duration-200 text-center ${
+                          selectedRelationship === relationship.id
+                            ? 'border-blue-500 bg-blue-50 text-blue-700'
+                            : 'border-gray-200 bg-white text-gray-600 hover:border-blue-300'
+                        }`}
+                      >
+                        <div className="text-lg mb-1">{relationship.emoji}</div>
+                        <div className="text-xs font-medium">{relationship.label}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
                 {/* メッセージ入力 */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-3">
@@ -938,12 +1012,12 @@ export default function DashboardDemoPage() {
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     maxLength={200}
-                    placeholder="正直な気持ちを伝えましょう..."
+                    placeholder="正直な気持ちをそのままぶつけてみましょう..."
                     className="w-full h-32 p-4 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none resize-none transition-colors duration-200"
                   />
                 </div>
 
-                {/* AI添削ボタン */}
+                {/* AI先生相談ボタン */}
                 <div className="border-t pt-4">
                   <button
                     onClick={handleStartAIChat}
@@ -954,7 +1028,7 @@ export default function DashboardDemoPage() {
                         : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                     }`}
                   >
-                    🤖 AI先生に添削してもらう
+                    🤖 AI先生に本音をぶつけてみる
                   </button>
                 </div>
 
@@ -962,7 +1036,7 @@ export default function DashboardDemoPage() {
                 {showAIChat && (
                   <div className="border-2 border-gray-300 rounded-xl p-4 bg-white shadow-md">
                     <div className="flex items-center justify-between mb-4">
-                      <h3 className="font-bold text-gray-800">💬 AI添削アシスタント</h3>
+                      <h3 className="font-bold text-gray-800">💬 AI先生に本音をぶつけてみる</h3>
                       <button 
                         onClick={closeAIChat}
                         className="text-gray-500 hover:bg-gray-100 rounded-full p-1"
@@ -988,6 +1062,26 @@ export default function DashboardDemoPage() {
                             </span>
                             <div className="flex-1">
                               <p className="text-sm text-gray-800 whitespace-pre-wrap">{msg.content}</p>
+                              {msg.role === 'assistant' && extractMessageFromAI(msg.content) && (
+                                <div className="mt-3 pt-2 border-t border-gray-200">
+                                  <button
+                                    onClick={() => {
+                                      const extractedMessage = extractMessageFromAI(msg.content);
+                                      if (extractedMessage) {
+                                        copyToClipboard(extractedMessage, msg.id);
+                                        setFinalMessage(extractedMessage); // 実際の送信欄にも自動入力
+                                      }
+                                    }}
+                                    className={`px-3 py-1 text-xs rounded-full transition-all duration-200 ${
+                                      copiedMessageId === msg.id
+                                        ? 'bg-green-100 text-green-700 border border-green-300'
+                                        : 'bg-blue-100 text-blue-700 border border-blue-300 hover:bg-blue-200'
+                                    }`}
+                                  >
+                                    {copiedMessageId === msg.id ? '✓ コピー完了!' : '📋 メッセージをコピー'}
+                                  </button>
+                                </div>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -1008,18 +1102,12 @@ export default function DashboardDemoPage() {
                     
                     {/* チャット入力 */}
                     <div className="flex space-x-2">
-                      <input
-                        type="text"
+                      <textarea
                         value={aiInput}
                         onChange={(e) => setAiInput(e.target.value)}
                         placeholder="追加の質問や要望があればどうぞ..."
-                        className="flex-1 p-2 border border-gray-300 rounded-lg focus:border-blue-400 focus:outline-none text-gray-800"
-                        onKeyPress={(e) => {
-                          if (e.key === 'Enter' && !isAIProcessing) {
-                            handleSendAIMessage(aiInput);
-                            setAiInput('');
-                          }
-                        }}
+                        className="flex-1 p-3 border border-blue-200 rounded-lg focus:border-blue-400 focus:outline-none text-gray-800 bg-blue-50 placeholder-gray-500 resize-none min-h-[80px]"
+                        rows={3}
                       />
                       <button
                         onClick={() => {
@@ -1039,12 +1127,26 @@ export default function DashboardDemoPage() {
                   </div>
                 )}
 
+                {/* 実際の送信メッセージ */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                    実際に送信するメッセージ <span className="text-gray-500">({finalMessage.length}/500文字)</span>
+                  </label>
+                  <textarea
+                    value={finalMessage}
+                    onChange={(e) => setFinalMessage(e.target.value)}
+                    maxLength={500}
+                    placeholder="AI先生のアドバイスを参考に、ここに実際に送信するメッセージを入力してください..."
+                    className="w-full h-32 p-4 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none resize-none transition-colors duration-200"
+                  />
+                </div>
+
                 {/* 送信ボタン */}
                 <button
                   onClick={() => handleSubmit('honesty')}
-                  disabled={!selectedRecipient || !message.trim() || isSubmitting}
+                  disabled={!selectedRecipient || !finalMessage.trim() || isSubmitting}
                   className={`w-full py-4 rounded-2xl font-semibold transition-all duration-200 ${
-                    selectedRecipient && message.trim() && !isSubmitting
+                    selectedRecipient && finalMessage.trim() && !isSubmitting
                       ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white hover:shadow-lg hover:scale-105'
                       : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                   }`}

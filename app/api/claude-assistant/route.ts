@@ -11,6 +11,33 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // 会話履歴をメッセージ配列に変換
+    const messages = []
+    
+    // 既存の会話履歴がある場合は追加
+    if (conversationContext) {
+      const contextLines = conversationContext.split('\n').filter(line => line.trim())
+      for (const line of contextLines) {
+        if (line.startsWith('user: ')) {
+          messages.push({
+            role: 'user',
+            content: line.substring(6)
+          })
+        } else if (line.startsWith('assistant: ')) {
+          messages.push({
+            role: 'assistant',
+            content: line.substring(11)
+          })
+        }
+      }
+    }
+
+    // 新しいユーザーメッセージを追加
+    messages.push({
+      role: 'user',
+      content: message
+    })
+
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -19,14 +46,10 @@ export async function POST(request: NextRequest) {
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: 'claude-3-haiku-20240307', // 高速で安価なモデル
-        max_tokens: 1000,
-        messages: [
-          {
-            role: 'user',
-            content: systemPrompt
-          }
-        ]
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 2000,
+        system: systemPrompt, // 正しいsystemプロンプトの設定
+        messages: messages
       })
     })
 
