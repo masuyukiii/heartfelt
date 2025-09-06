@@ -606,16 +606,20 @@ export default function DashboardDemoPage() {
                   } ${!message.is_read ? 'ring-2 ring-purple-200 shadow-lg' : ''}`}
                 >
                   <div className="flex items-start justify-between mb-2">
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-3">
                       <span className="text-lg">
                         {message.type === 'thanks' ? '💚' : '💭'}
                       </span>
-                      <div>
+                      <div className="flex items-center space-x-2">
                         <span className="font-semibold text-gray-800">
                           {message.sender_name || 'Anonymous'}
                         </span>
-                        <span className="text-sm text-gray-500 ml-2">
-                          {message.type === 'thanks' ? 'ありがとうメッセージ' : '本音メッセージ'}
+                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                          message.type === 'thanks' 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-blue-100 text-blue-800'
+                        }`}>
+                          {message.type === 'thanks' ? 'ありがとう' : '本音'}
                         </span>
                       </div>
                     </div>
