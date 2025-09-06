@@ -1018,7 +1018,7 @@ export default function ProtectedPage() {
             onClick={() => setShowDemoControls(!showDemoControls)}
             className="w-full px-3 py-2 flex items-center justify-between text-xs text-gray-600 hover:bg-gray-50 transition-colors duration-200"
           >
-            <span className="font-medium">🔧 開発者向けデモコントロール</span>
+            <span className="font-medium">🔧 開発者向けデモ</span>
             <span className={`transform transition-transform duration-200 ${showDemoControls ? 'rotate-180' : ''}`}>
               ▼
             </span>
