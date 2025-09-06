@@ -13,13 +13,13 @@ import { getAIFeedback, type ChatMessage } from '@/lib/claude/ai-assistant';
 
 // 6段階成長システム関数（目標割合ベース）
 function getGrowthStageIcon(totalPoints: number, targetPoints: number) {
-  if (totalPoints === 0) return { path: '/images/growth-stages/seed.png', size: 'w-48' }; // タネ（小さめ）
+  if (totalPoints === 0) return { path: '/images/growth-stages/seed.png', size: 'w-32' }; // タネ（小さめ）
   const percentage = (totalPoints / targetPoints) * 100;
-  if (percentage <= 10) return { path: '/images/growth-stages/sprout.gif', size: 'w-64' }; // 芽
-  if (percentage <= 30) return { path: '/images/growth-stages/young-leaves.gif', size: 'w-64' }; // 若葉
-  if (percentage <= 60) return { path: '/images/growth-stages/small-tree.gif', size: 'w-64' }; // 小木
-  if (percentage <= 90) return { path: '/images/growth-stages/tree.gif', size: 'w-64' }; // 木
-  return { path: '/images/growth-stages/flower.gif', size: 'w-64' }; // 花
+  if (percentage <= 10) return { path: '/images/growth-stages/sprout.gif', size: 'w-40' }; // 芽
+  if (percentage <= 30) return { path: '/images/growth-stages/young-leaves.gif', size: 'w-40' }; // 若葉
+  if (percentage <= 60) return { path: '/images/growth-stages/small-tree.gif', size: 'w-40' }; // 小木
+  if (percentage <= 90) return { path: '/images/growth-stages/tree.gif', size: 'w-40' }; // 木
+  return { path: '/images/growth-stages/flower.gif', size: 'w-40' }; // 花
 }
 
 function getGrowthMessage(totalPoints: number, targetPoints: number) {
@@ -1038,35 +1038,35 @@ export default function ProtectedPage() {
           </div>
 
           {/* 進捗エリア */}
-          <div className="px-4 py-3 bg-gradient-to-b from-white to-gray-50">
+          <div className="px-3 py-2 bg-gradient-to-b from-white to-gray-50">
             
             {/* 進捗バー */}
-            <div className="mb-3">
-              <div className="flex justify-between items-center mb-2">
+            <div className="mb-2">
+              <div className="flex justify-between items-center mb-1">
                 <span className="text-sm font-medium text-gray-600">進捗状況</span>
                 <span className="text-sm font-bold text-gray-800">{totalPoints} / {rewardGoal.requiredPoints}</span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+              <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
                 <div 
-                  className="bg-gradient-to-r from-emerald-500 to-teal-500 h-3 rounded-full transition-all duration-1000 ease-out shadow-sm"
+                  className="bg-gradient-to-r from-emerald-500 to-teal-500 h-2 rounded-full transition-all duration-1000 ease-out shadow-sm"
                   style={{ width: `${progressPercentage}%` }}
                 ></div>
               </div>
             </div>
 
             {/* 達成メッセージ */}
-            <div className="text-center mb-3">
+            <div className="text-center mb-2">
               {remainingPoints > 0 ? (
-                <div className="space-y-2">
-                  <p className="text-gray-600 text-sm">達成まで</p>
-                  <p className="text-3xl font-bold text-emerald-600">{remainingPoints}</p>
-                  <p className="text-gray-600 text-sm">ポイント</p>
+                <div className="space-y-1">
+                  <p className="text-gray-600 text-xs">達成まで</p>
+                  <p className="text-2xl font-bold text-emerald-600">{remainingPoints}</p>
+                  <p className="text-gray-600 text-xs">ポイント</p>
                 </div>
               ) : (
-                <div className="space-y-2">
-                  <div className="text-4xl">🌟</div>
-                  <p className="text-xl font-bold text-emerald-600">目標達成！</p>
-                  <p className="text-gray-600 text-sm">お疲れ様でした</p>
+                <div className="space-y-1">
+                  <div className="text-3xl">🌟</div>
+                  <p className="text-lg font-bold text-emerald-600">目標達成！</p>
+                  <p className="text-gray-600 text-xs">お疲れ様でした</p>
                 </div>
               )}
             </div>
