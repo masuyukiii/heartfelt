@@ -1247,26 +1247,24 @@ export default function ProtectedPage() {
                       <p className="text-sm text-gray-500 mt-2">ユーザー一覧を読み込み中...</p>
                     </div>
                   ) : (
-                    <div className="space-y-2 max-h-40 overflow-y-auto">
+                    <select
+                      value={selectedRecipient}
+                      onChange={(e) => setSelectedRecipient(e.target.value)}
+                      className={`w-full p-3 rounded-xl border-2 transition-all duration-200 ${
+                        selectedRecipient
+                          ? 'border-pink-500 bg-pink-50'
+                          : 'border-gray-200 hover:border-gray-300'
+                      } focus:outline-none focus:border-pink-500`}
+                    >
+                      <option value="">宛先を選択...</option>
                       {(users.length > 0 ? users : mockRecipients).map((recipient) => (
-                        <button
-                          key={recipient.id}
-                          onClick={() => setSelectedRecipient(recipient.id)}
-                          className={`w-full text-left p-3 rounded-xl border-2 transition-all duration-200 ${
-                            selectedRecipient === recipient.id
-                              ? 'border-pink-500 bg-pink-50'
-                              : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                          }`}
-                        >
-                          <div className="font-medium text-gray-900">
-                            {('email' in recipient) ? (recipient.name || recipient.email || '匿名ユーザー') : recipient.name}
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            {('email' in recipient) ? (recipient.department || 'Supabaseユーザー') : recipient.department}
-                          </div>
-                        </button>
+                        <option key={recipient.id} value={recipient.id}>
+                          {('email' in recipient) ? (recipient.name || recipient.email || '匿名ユーザー') : recipient.name}
+                          {' - '}
+                          {('email' in recipient) ? (recipient.department || 'Supabaseユーザー') : recipient.department}
+                        </option>
                       ))}
-                    </div>
+                    </select>
                   )}
                 </div>
 
@@ -1353,26 +1351,24 @@ export default function ProtectedPage() {
                       <p className="text-sm text-gray-500 mt-2">ユーザー一覧を読み込み中...</p>
                     </div>
                   ) : (
-                    <div className="space-y-2 max-h-40 overflow-y-auto">
+                    <select
+                      value={selectedRecipient}
+                      onChange={(e) => setSelectedRecipient(e.target.value)}
+                      className={`w-full p-3 rounded-xl border-2 transition-all duration-200 ${
+                        selectedRecipient
+                          ? 'border-blue-500 bg-blue-50'
+                          : 'border-gray-200 hover:border-gray-300'
+                      } focus:outline-none focus:border-blue-500`}
+                    >
+                      <option value="">宛先を選択...</option>
                       {(users.length > 0 ? users : mockRecipients).map((recipient) => (
-                        <button
-                          key={recipient.id}
-                          onClick={() => setSelectedRecipient(recipient.id)}
-                          className={`w-full text-left p-3 rounded-xl border-2 transition-all duration-200 ${
-                            selectedRecipient === recipient.id
-                              ? 'border-blue-500 bg-blue-50'
-                              : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                          }`}
-                        >
-                          <div className="font-medium text-gray-900">
-                            {('email' in recipient) ? (recipient.name || recipient.email || '匿名ユーザー') : recipient.name}
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            {('email' in recipient) ? (recipient.department || 'Supabaseユーザー') : recipient.department}
-                          </div>
-                        </button>
+                        <option key={recipient.id} value={recipient.id}>
+                          {('email' in recipient) ? (recipient.name || recipient.email || '匿名ユーザー') : recipient.name}
+                          {' - '}
+                          {('email' in recipient) ? (recipient.department || 'Supabaseユーザー') : recipient.department}
+                        </option>
                       ))}
-                    </div>
+                    </select>
                   )}
                 </div>
 
