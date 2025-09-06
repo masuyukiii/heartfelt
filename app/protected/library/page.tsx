@@ -4,17 +4,13 @@ import { useState, useEffect } from 'react';
 import { createClient } from "@/lib/supabase/client";
 import { getLibraryWords, removeFromLibrary, getLibraryStats, type WordLibraryEntry } from '@/lib/supabase/word-library-actions';
 
-// 雲の位置とサイズを決めるためのヘルパー関数
 function getCloudStyle(index: number, total: number) {
-  // 複数の配置パターンを用意
   const patterns = [
-    // パターン1: ランダム配置
     () => ({
       left: `${Math.random() * 70 + 10}%`,
       top: `${Math.random() * 60 + 15}%`,
       transform: `rotate(${Math.random() * 20 - 10}deg)`,
     }),
-    // パターン2: 円形配置
     () => {
       const angle = (index / total) * Math.PI * 2;
       const radius = 25;
@@ -26,7 +22,6 @@ function getCloudStyle(index: number, total: number) {
         transform: `rotate(${Math.sin(angle) * 15}deg)`,
       };
     },
-    // パターン3: 波形配置
     () => ({
       left: `${(index / total) * 80 + 10}%`,
       top: `${Math.sin((index / total) * Math.PI * 3) * 20 + 40}%`,
@@ -38,7 +33,6 @@ function getCloudStyle(index: number, total: number) {
   return pattern();
 }
 
-// 文字数に基づいてクラウドサイズを決める
 function getCloudSize(content: string) {
   const length = content.length;
   if (length < 20) return 'text-sm px-3 py-2';
@@ -263,7 +257,6 @@ export default function LibraryPage() {
           </div>
         ) : (
           <div className="relative min-h-96 bg-gradient-to-br from-sky-100/50 to-blue-200/30 rounded-3xl p-8 shadow-inner">
-            {/* 雲のような配置で言葉を表示 */}
             {filteredWords.map((word, index) => {
               const style = getCloudStyle(index, filteredWords.length);
               const sizeClass = getCloudSize(word.message_content);
