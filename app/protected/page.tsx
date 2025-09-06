@@ -93,7 +93,7 @@ export default function ProtectedPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const [messageError, setMessageError] = useState<string | null>(null);
-  const [messageFilter, setMessageFilter] = useState<'unread' | 'all' | 'thanks' | 'honesty'>('all');
+  const [messageFilter, setMessageFilter] = useState<'unread' | 'all' | 'thanks' | 'honesty'>('unread');
 
   // 意気込み機能の状態（初期値は空配列）
   const [motivations, setMotivations] = useState<Motivation[]>([]);
