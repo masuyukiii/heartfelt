@@ -357,14 +357,14 @@ export default function ProtectedPage() {
     return () => clearInterval(interval);
   }, [motivations]);
 
-  // キーワードタグを3秒ごとに更新
+  // キーワードタグを6秒ごとに更新
   useEffect(() => {
     if (!showThanksModal) return;
     
     const interval = setInterval(() => {
       const shuffled = [...thanksKeywords].sort(() => Math.random() - 0.5);
-      setCurrentKeywords(shuffled.slice(0, 5));
-    }, 3000);
+      setCurrentKeywords(shuffled.slice(0, 8));
+    }, 6000);
 
     return () => clearInterval(interval);
   }, [showThanksModal]);
@@ -409,9 +409,9 @@ export default function ProtectedPage() {
     setMessage('');
     // モーダルを開くたびにユーザーリストを更新
     loadUsers();
-    // ランダムに5つのキーワードを選択
+    // ランダムに8つのキーワードを選択
     const shuffled = [...thanksKeywords].sort(() => Math.random() - 0.5);
-    setCurrentKeywords(shuffled.slice(0, 5));
+    setCurrentKeywords(shuffled.slice(0, 8));
   };
 
   const openHonestyModal = () => {
@@ -1257,12 +1257,12 @@ export default function ProtectedPage() {
                   </label>
                   
                   {/* キーワードタグ */}
-                  <div className="mb-2 min-h-[28px]">
-                    <div className="flex flex-wrap gap-1.5" key={currentKeywords.join(',')}>
+                  <div className="mb-3 min-h-[56px]">
+                    <div className="flex flex-wrap gap-1.5 transition-opacity duration-500" key={currentKeywords.join(',')}>
                       {currentKeywords.map((keyword, index) => (
                         <span
                           key={`${keyword}-${index}`}
-                          className="inline-block px-2 py-0.5 text-xs text-pink-600 bg-pink-50 border border-pink-200 rounded-full animate-pulse"
+                          className="inline-block px-2.5 py-1 text-[10px] text-pink-600 bg-pink-50 border border-pink-200 rounded-full transition-all duration-300 hover:bg-pink-100"
                         >
                           {keyword}
                         </span>
