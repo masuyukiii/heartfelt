@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { getReceivedMessages, markAsRead, type Message } from '@/lib/supabase/message-actions';
 
 interface MockMessage {
   id: string;
@@ -41,35 +42,105 @@ export default function InboxDemoPage() {
     }
   ];
 
-  const [messages, setMessages] = useState<MockMessage[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // ページロード時にローカルストレージからメッセージを読み込み
+  // ページロード時にSupabaseからメッセージを読み込み
   useEffect(() => {
-    const storedMessages = localStorage.getItem('heartfelt-inbox-messages');
-    if (storedMessages) {
-      const parsedMessages = JSON.parse(storedMessages);
-      // ローカルストレージのメッセージとデフォルトメッセージを結合
-      setMessages([...parsedMessages, ...defaultMessages]);
-    } else {
-      // ローカルストレージにデータがない場合はデフォルトメッセージのみ
-      setMessages(defaultMessages);
-    }
+    loadMessages();
   }, []);
 
-  const handleMarkAsRead = (messageId: string) => {
-    const updatedMessages = messages.map(msg => 
-      msg.id === messageId ? { ...msg, isRead: true } : msg
-    );
-    setMessages(updatedMessages);
-    
-    // ローカルストレージも更新（デフォルトメッセージは除く）
-    const storedMessages = updatedMessages.filter(msg => !defaultMessages.some(defaultMsg => defaultMsg.id === msg.id));
-    localStorage.setItem('heartfelt-inbox-messages', JSON.stringify(storedMessages));
+  const loadMessages = async () => {
+    setIsLoading(true);
+    try {
+      const realMessages = await getReceivedMessages();
+      
+      // 実際のメッセージがある場合はそれを使用、ない場合はデモメッセージを表示
+      if (realMessages.length > 0) {
+        setMessages(realMessages.map(msg => ({
+          id: msg.id,
+          type: msg.type,
+          sender: msg.sender_name || 'Unknown',
+          content: msg.content,
+          receivedAt: formatTimeAgo(new Date(msg.created_at)),
+          isRead: msg.is_read
+        })));
+      } else {
+        // デモメッセージを表示
+        setMessages(defaultMessages.map(msg => ({
+          id: msg.id,
+          type: msg.type,
+          sender: msg.sender,
+          content: msg.content,
+          receivedAt: msg.receivedAt,
+          isRead: msg.isRead
+        })));
+      }
+    } catch (error) {
+      console.error('Failed to load messages:', error);
+      // エラー時はデモメッセージを表示
+      setMessages(defaultMessages.map(msg => ({
+        id: msg.id,
+        type: msg.type,
+        sender: msg.sender,
+        content: msg.content,
+        receivedAt: msg.receivedAt,
+        isRead: msg.isRead
+      })));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const formatTimeAgo = (date: Date) => {
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / (1000 * 60));
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffMins < 1) return '今';
+    if (diffMins < 60) return `${diffMins}分前`;
+    if (diffHours < 24) return `${diffHours}時間前`;
+    if (diffDays < 7) return `${diffDays}日前`;
+    return date.toLocaleDateString('ja-JP');
+  };
+
+  const handleMarkAsRead = async (messageId: string) => {
+    try {
+      // Supabaseで既読状態を更新
+      const result = await markAsRead(messageId);
+      
+      if (result.success) {
+        // UIを更新
+        const updatedMessages = messages.map(msg => 
+          msg.id === messageId ? { ...msg, isRead: true } : msg
+        );
+        setMessages(updatedMessages);
+      } else {
+        console.error('Failed to mark as read:', result.error);
+        alert('既読状態の更新に失敗しました');
+      }
+    } catch (error) {
+      console.error('Mark as read error:', error);
+      // デモメッセージの場合はローカルで更新
+      const updatedMessages = messages.map(msg => 
+        msg.id === messageId ? { ...msg, isRead: true } : msg
+      );
+      setMessages(updatedMessages);
+    }
   };
 
   const handleClearMessages = () => {
-    localStorage.removeItem('heartfelt-inbox-messages');
-    setMessages(defaultMessages);
+    // デモメッセージのみリセット（実際のメッセージは削除しない）
+    setMessages(defaultMessages.map(msg => ({
+      id: msg.id,
+      type: msg.type,
+      sender: msg.sender,
+      content: msg.content,
+      receivedAt: msg.receivedAt,
+      isRead: msg.isRead
+    })));
   };
 
   const unreadCount = messages.filter(msg => !msg.isRead).length;
@@ -123,8 +194,14 @@ export default function InboxDemoPage() {
         </div>
 
         {/* メッセージリスト */}
-        <div className="space-y-4">
-          {messages.map((message) => (
+        {isLoading ? (
+          <div className="text-center py-8">
+            <div className="animate-spin w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full mx-auto"></div>
+            <p className="text-sm text-gray-500 mt-3">メッセージを読み込み中...</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {messages.map((message) => (
             <div
               key={message.id}
               className={`bg-white rounded-lg shadow-md p-4 border-l-4 transition-all duration-200 ${
@@ -174,8 +251,9 @@ export default function InboxDemoPage() {
                 </div>
               )}
             </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
         {/* 統計情報 */}
         <div className="bg-white rounded-lg shadow-md p-6">

@@ -13,37 +13,71 @@ export async function getUsers(): Promise<User[]> {
   const supabase = createClient()
   
   try {
-    // まずauth.usersからユーザー一覧を取得してみる
-    const { data: authData, error: authError } = await supabase.auth.admin.listUsers()
+    console.log('Attempting to fetch users...')
     
-    if (authError || !authData) {
-      console.log('Auth users not accessible, trying profiles table...')
-      
-      // profilesテーブルからの取得を試行
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .order('created_at', { ascending: true })
-
-      if (error) {
-        console.log('Profiles table not found or empty, returning empty array')
-        return []
-      }
-
-      return data || []
+    // 現在のユーザーを取得
+    const { data: { user: currentUser }, error: currentUserError } = await supabase.auth.getUser()
+    
+    if (currentUserError || !currentUser) {
+      console.log('Current user not found:', currentUserError)
+      return []
     }
 
-    // auth.usersが利用可能な場合はそちらを使用
-    return authData.users.map(user => ({
-      id: user.id,
-      email: user.email || '',
-      name: user.user_metadata?.name || user.email?.split('@')[0] || '匿名ユーザー',
-      department: user.user_metadata?.department,
-      avatar_url: user.user_metadata?.avatar_url,
-      created_at: user.created_at
-    }))
+    console.log('Current user found:', currentUser.email)
+
+    // profilesテーブルが存在するかチェック
+    let profiles: any[] = [];
+    try {
+      const { data: profilesData, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .neq('id', currentUser.id) // 自分以外のユーザーのみ取得
+        .order('created_at', { ascending: true })
+
+      if (!profileError && profilesData) {
+        profiles = profilesData;
+        console.log('Found profiles (excluding self):', profiles.length)
+      }
+    } catch (profileError) {
+      console.log('Profiles table does not exist or is not accessible:', profileError)
+    }
+
+    // profilesテーブルにデータがある場合はそれを使用（自分を除く）
+    if (profiles.length > 0) {
+      return profiles.map(profile => ({
+        id: profile.id,
+        email: profile.email || '',
+        name: profile.name || profile.email?.split('@')[0] || '匿名ユーザー',
+        department: profile.department,
+        avatar_url: profile.avatar_url,
+        created_at: profile.created_at
+      }))
+    }
+
+    console.log('Creating demo users (excluding current user)')
+
+    // 現在のユーザー以外のサンプルユーザーのみを作成
+    const realUsers: User[] = [
+      {
+        id: 'demo-user-2',
+        email: 'colleague@example.com',
+        name: '同僚',
+        department: 'エンジニアリング部',
+        created_at: new Date().toISOString()
+      },
+      {
+        id: 'demo-user-3', 
+        email: 'manager@example.com',
+        name: 'マネージャー',
+        department: '管理部',
+        created_at: new Date().toISOString()
+      }
+    ]
+
+    return realUsers
+
   } catch (error) {
-    console.log('Error fetching users, returning empty array:', error)
+    console.log('Error fetching users:', error)
     return []
   }
 }

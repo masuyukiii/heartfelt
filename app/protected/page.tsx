@@ -3,8 +3,11 @@
 import { useState, useEffect } from 'react';
 import { createClient } from "@/lib/supabase/client";
 import { getUsers, type User } from '@/lib/supabase/users';
+import { getCurrentUserProfile } from '@/lib/supabase/profile-actions';
+import { sendMessage } from '@/lib/supabase/message-actions';
 import Link from "next/link";
-import { Heart, MessageCircle, TreePine, Gift, CloudRain, Send, ArrowLeft, Sparkles } from "lucide-react";
+import { Heart, MessageCircle, TreePine, Gift, CloudRain, Send, ArrowLeft, Sparkles, Settings, User as UserIcon } from "lucide-react";
+import ProfileEditModal from '@/components/profile/ProfileEditModal';
 
 // 6段階成長システム関数
 function getGrowthStageIcon(totalPoints: number) {
@@ -63,6 +66,8 @@ export default function ProtectedPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [currentUserProfile, setCurrentUserProfile] = useState<any>(null);
 
   // ご褒美ゴール設定
   const [rewardGoal, setRewardGoal] = useState({
@@ -93,6 +98,7 @@ export default function ProtectedPage() {
     checkUser();
     loadInitialData();
     loadUsers();
+    loadCurrentUserProfile();
   }, []);
 
   const checkUser = async () => {
@@ -130,6 +136,20 @@ export default function ProtectedPage() {
     } finally {
       setIsLoadingUsers(false);
     }
+  };
+
+  const loadCurrentUserProfile = async () => {
+    try {
+      const profile = await getCurrentUserProfile();
+      setCurrentUserProfile(profile);
+    } catch (error) {
+      console.error('Failed to load current user profile:', error);
+    }
+  };
+
+  const handleProfileUpdate = () => {
+    loadUsers(); // ユーザー一覧を再読み込み
+    loadCurrentUserProfile(); // 現在のユーザープロフィールを再読み込み
   };
 
   // ポイントが変更されたときにローカルストレージに保存
@@ -240,47 +260,32 @@ export default function ProtectedPage() {
     
     setIsSubmitting(true);
     
-    // 送信シミュレーション
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    // 送信したメッセージに対する返信を受信ボックスに追加（自分宛）
-    const recipients = users.length > 0 ? users : mockRecipients;
-    const selectedRecipientData = recipients.find(r => r.id === selectedRecipient);
-    if (selectedRecipientData) {
-      // 送信したメッセージに対する自動返信を生成
-      const recipientName = ('email' in selectedRecipientData) 
-        ? (selectedRecipientData.name || selectedRecipientData.email || '匿名ユーザー')
-        : selectedRecipientData.name;
-      const replyMessage = generateAutoReply(type, recipientName, message);
-      
-      const newMessage = {
-        id: Date.now().toString(),
+    try {
+      // 実際にSupabaseにメッセージを送信
+      const result = await sendMessage({
+        recipientId: selectedRecipient,
         type: type,
-        sender: recipientName,
-        content: replyMessage,
-        receivedAt: '今',
-        isRead: false
-      };
-      
-      // 既存のメッセージを取得
-      const existingMessages = JSON.parse(localStorage.getItem('heartfelt-inbox-messages') || '[]');
-      
-      // 新しいメッセージを先頭に追加
-      const updatedMessages = [newMessage, ...existingMessages];
-      
-      // ローカルストレージに保存
-      localStorage.setItem('heartfelt-inbox-messages', JSON.stringify(updatedMessages));
+        content: message
+      });
+
+      if (result.success) {
+        // ポイント追加
+        addPoints(type);
+        
+        // 成功メッセージとモーダル閉じる
+        setIsSubmitting(false);
+        closeModals();
+        
+        // 成功通知
+        alert(`${type === 'thanks' ? 'ありがとう' : '本音'}メッセージを送信しました！`);
+      } else {
+        throw new Error(result.error || 'メッセージ送信に失敗しました');
+      }
+    } catch (error) {
+      console.error('Message send error:', error);
+      setIsSubmitting(false);
+      alert('メッセージの送信に失敗しました。もう一度お試しください。');
     }
-    
-    // ポイント追加
-    addPoints(type);
-    
-    // 成功メッセージとモーダル閉じる
-    setIsSubmitting(false);
-    closeModals();
-    
-    // 簡単な成功通知
-    alert(`${type === 'thanks' ? 'ありがとう' : '本音'}メッセージを送信しました！\n受信BOXで確認できます。`);
   };
 
   if (loading) {
@@ -311,13 +316,22 @@ export default function ProtectedPage() {
           {/* ヘッダー - ご褒美ゴール */}
           <div className="bg-gradient-to-r from-emerald-500 to-teal-500 px-6 py-8 text-center relative overflow-hidden">
             <div className="absolute inset-0 bg-white/10"></div>
-            <button
-              onClick={openGoalEditModal}
-              className="absolute top-4 right-4 text-white hover:bg-white/20 rounded-full p-2 transition-all duration-200"
-              title="ご褒美ゴールを編集"
-            >
-              ✏️
-            </button>
+            <div className="absolute top-4 right-4 flex gap-2">
+              <button
+                onClick={() => setShowProfileModal(true)}
+                className="text-white hover:bg-white/20 rounded-full p-2 transition-all duration-200"
+                title="プロフィールを編集"
+              >
+                <UserIcon size={20} />
+              </button>
+              <button
+                onClick={openGoalEditModal}
+                className="text-white hover:bg-white/20 rounded-full p-2 transition-all duration-200"
+                title="ご褒美ゴールを編集"
+              >
+                ✏️
+              </button>
+            </div>
             <div className="relative z-10">
               <div className="inline-flex items-center justify-center w-12 h-12 bg-white/20 rounded-full mb-3">
                 <span className="text-2xl">🎯</span>
@@ -606,6 +620,13 @@ export default function ProtectedPage() {
             </div>
           </div>
         )}
+
+        {/* プロフィール編集モーダル */}
+        <ProfileEditModal
+          isOpen={showProfileModal}
+          onClose={() => setShowProfileModal(false)}
+          onUpdate={handleProfileUpdate}
+        />
       </div>
     </div>
   );
