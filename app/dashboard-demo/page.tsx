@@ -1352,25 +1352,45 @@ export default function DashboardDemoPage() {
                     type="text"
                     value={editGoalTitle}
                     onChange={(e) => setEditGoalTitle(e.target.value)}
-                    placeholder="例：カフェで読書タイム"
+                    placeholder="例：ちょっと豪華なランチ"
                     maxLength={50}
                     className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none transition-colors duration-200"
                   />
                   <div className="text-xs text-gray-500 mt-1">{editGoalTitle.length}/50文字</div>
                 </div>
 
-                {/* ゴール説明 */}
+                {/* みんなの意気込み */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3">詳細説明（任意）</label>
-                  <textarea
-                    value={editGoalDescription}
-                    onChange={(e) => setEditGoalDescription(e.target.value)}
-                    placeholder="例：お気に入りのカフェでゆっくり読書を楽しむ"
-                    maxLength={100}
-                    rows={3}
-                    className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none resize-none transition-colors duration-200"
-                  />
-                  <div className="text-xs text-gray-500 mt-1">{editGoalDescription.length}/100文字</div>
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                    💪 みんなの意気込み
+                    <span className="text-xs text-gray-500 ml-2">（目標達成に向けた応援メッセージ）</span>
+                  </label>
+                  <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 h-24 overflow-hidden relative">
+                    <div className="motivation-scroll space-y-2">
+                      {/* サンプル意気込みメッセージ */}
+                      <div className="text-sm text-gray-700 animate-fade-in">
+                        <span className="font-medium text-blue-600">田中さん：</span>
+                        "今月こそは自分にご褒美をあげるぞ！"
+                      </div>
+                      <div className="text-sm text-gray-700 animate-fade-in" style={{animationDelay: '2s'}}>
+                        <span className="font-medium text-green-600">佐藤さん：</span>
+                        "みんなで目標達成頑張ろう✨"
+                      </div>
+                      <div className="text-sm text-gray-700 animate-fade-in" style={{animationDelay: '4s'}}>
+                        <span className="font-medium text-purple-600">鈴木さん：</span>
+                        "小さな積み重ねが大きな成果に🌸"
+                      </div>
+                    </div>
+                  </div>
+                  <button 
+                    className="mt-2 text-xs text-blue-600 hover:text-blue-800 underline"
+                    onClick={() => {
+                      // 意気込み投稿モーダルを開く予定
+                      alert('意気込み投稿機能は開発中です');
+                    }}
+                  >
+                    + あなたも意気込みを投稿する
+                  </button>
                 </div>
 
                 {/* 必要ポイント数 */}
