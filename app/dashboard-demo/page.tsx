@@ -6,23 +6,25 @@ import { getReceivedMessages, markAsRead, sendMessage, type Message } from '@/li
 import { updateProfile, getCurrentUserProfile } from '@/lib/supabase/profile-actions';
 import { getAIFeedback, type ChatMessage } from '@/lib/claude/ai-assistant';
 
-// 6段階成長システム関数
-function getGrowthStageIcon(totalPoints: number) {
-  if (totalPoints === 0) return '🌰';
-  if (totalPoints <= 3) return '🌱';
-  if (totalPoints <= 8) return '🌿';
-  if (totalPoints <= 15) return '🌲';
-  if (totalPoints <= 25) return '🌳';
-  return '🌸';
+// 6段階成長システム関数（目標割合ベース）
+function getGrowthStageIcon(totalPoints: number, targetPoints: number) {
+  if (totalPoints === 0) return '🌰'; // タネ
+  const percentage = (totalPoints / targetPoints) * 100;
+  if (percentage <= 10) return '🌱'; // 芽
+  if (percentage <= 30) return '🌿'; // 若葉
+  if (percentage <= 60) return '🌲'; // 小木
+  if (percentage <= 90) return '🌳'; // 木
+  return '🌸'; // 花
 }
 
-function getGrowthMessage(totalPoints: number) {
+function getGrowthMessage(totalPoints: number, targetPoints: number) {
   if (totalPoints === 0) return '心の種を植えましょう';
-  if (totalPoints <= 3) return '小さな芽が出ました';
-  if (totalPoints <= 8) return '成長しています';
-  if (totalPoints <= 15) return '立派に育っています';
-  if (totalPoints <= 25) return '大きく成長しました';
-  return '美しく花が咲きました';
+  const percentage = (totalPoints / targetPoints) * 100;
+  if (percentage <= 10) return '小さな芽が出ました';
+  if (percentage <= 30) return '順調に成長しています';
+  if (percentage <= 60) return '立派に育っています';
+  if (percentage <= 90) return 'もうすぐ目標達成です';
+  return '目標達成！美しく花が咲きました';
 }
 
 // 自動返信メッセージを生成する関数
@@ -860,10 +862,10 @@ export default function DashboardDemoPage() {
               <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-transparent"></div>
               <div className="relative z-10 text-center">
                 <div className="text-7xl mb-4 filter drop-shadow-lg animate-pulse">
-                  {getGrowthStageIcon(totalPoints)}
+                  {getGrowthStageIcon(totalPoints, rewardGoal.requiredPoints)}
                 </div>
                 <p className="text-emerald-700 font-medium text-sm">
-                  {getGrowthMessage(totalPoints)}
+                  {getGrowthMessage(totalPoints, rewardGoal.requiredPoints)}
                 </p>
                 <div className="mt-3 inline-flex items-center bg-white/60 backdrop-blur-sm px-3 py-1 rounded-full">
                   <span className="text-xs text-gray-600">現在 {totalPoints} ポイント</span>
