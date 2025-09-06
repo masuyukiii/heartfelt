@@ -742,7 +742,7 @@ export default function ProtectedPage() {
               </h1>
             </div>
             <p className="text-slate-600 text-sm leading-relaxed">
-              あなたに届いたメッセージを確認しましょう
+              大切な人からの温かい言葉があなたを待っています
             </p>
             {unreadCount > 0 && (
               <div className="inline-flex items-center bg-red-500 text-white px-4 py-2 rounded-xl font-semibold shadow-sm">
@@ -1028,6 +1028,9 @@ export default function ProtectedPage() {
               <h1 className="text-white text-lg font-bold tracking-wide">
                 ご褒美ゴール：{rewardGoal.name}
               </h1>
+              <p className="text-emerald-100 text-xs mt-1">
+                みんなで「ありがとう」を伝えてゴールを目指そう！
+              </p>
               {motivations.length > 0 && (
                 <div key={currentMotivationIndex} className="motivation-fade-in mt-2">
                   <p className="text-emerald-100 text-sm">
