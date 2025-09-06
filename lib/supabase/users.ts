@@ -42,39 +42,15 @@ export async function getUsers(): Promise<User[]> {
       console.log('Profiles table does not exist or is not accessible:', profileError)
     }
 
-    // profilesテーブルにデータがある場合はそれを使用（自分を除く）
-    if (profiles.length > 0) {
-      return profiles.map(profile => ({
-        id: profile.id,
-        email: profile.email || '',
-        name: profile.name || profile.email?.split('@')[0] || '匿名ユーザー',
-        department: profile.department,
-        avatar_url: profile.avatar_url,
-        created_at: profile.created_at
-      }))
-    }
-
-    console.log('Creating demo users (excluding current user)')
-
-    // 現在のユーザー以外のサンプルユーザーのみを作成
-    const realUsers: User[] = [
-      {
-        id: 'demo-user-2',
-        email: 'colleague@example.com',
-        name: '同僚',
-        department: 'エンジニアリング部',
-        created_at: new Date().toISOString()
-      },
-      {
-        id: 'demo-user-3', 
-        email: 'manager@example.com',
-        name: 'マネージャー',
-        department: '管理部',
-        created_at: new Date().toISOString()
-      }
-    ]
-
-    return realUsers
+    // profilesテーブルからのデータを使用（自分を除く）
+    return profiles.map(profile => ({
+      id: profile.id,
+      email: profile.email || '',
+      name: profile.name || profile.email?.split('@')[0] || '匿名ユーザー',
+      department: profile.department,
+      avatar_url: profile.avatar_url,
+      created_at: profile.created_at
+    }))
 
   } catch (error) {
     console.log('Error fetching users:', error)
