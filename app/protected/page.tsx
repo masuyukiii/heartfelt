@@ -1072,7 +1072,7 @@ export default function ProtectedPage() {
             </div>
 
             {/* 植物エリア */}
-            <div className="bg-gradient-to-b from-sky-50 to-emerald-50 rounded-xl p-1 mb-2 relative overflow-hidden">
+            <div className="bg-gradient-to-b from-sky-50 to-emerald-50 rounded-xl p-0 mb-1 relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-transparent"></div>
               <div className="relative z-10 text-center">
                 <div className="filter drop-shadow-lg">
@@ -1084,7 +1084,7 @@ export default function ProtectedPage() {
                         <img 
                           src={iconPath} 
                           alt="成長ステージ" 
-                          className="w-96 h-96 mx-auto object-contain"
+                          className="w-48 h-48 mx-auto object-contain"
                         />
                       );
                     }
@@ -1094,19 +1094,19 @@ export default function ProtectedPage() {
                 <p className="text-emerald-700 font-medium text-xs whitespace-pre-line">
                   {getGrowthMessage(totalPoints, rewardGoal.requiredPoints)}
                 </p>
-                <div className="inline-flex items-center bg-white/60 backdrop-blur-sm px-2 py-1 rounded-full mb-1">
+                <div className="inline-flex items-center bg-white/60 backdrop-blur-sm px-2 py-0.5 rounded-full">
                   <span className="text-xs text-gray-600">現在 {totalPoints} ポイント</span>
                 </div>
                 
                 {/* ポイント詳細（植物エリア内に統合） */}
-                <div className="grid grid-cols-2 gap-2 mt-1">
-                  <div className="bg-white/40 backdrop-blur-sm rounded-lg p-2 text-center border border-pink-200/50">
-                    <div className="text-sm mb-1">💖</div>
+                <div className="grid grid-cols-2 gap-1 mt-0.5">
+                  <div className="bg-white/40 backdrop-blur-sm rounded-lg p-1 text-center border border-pink-200/50">
+                    <div className="text-sm">💖</div>
                     <div className="text-sm font-bold text-pink-600">{teamPoints.thanksPoints}</div>
                     <div className="text-xs text-pink-700">ありがとう</div>
                   </div>
-                  <div className="bg-white/40 backdrop-blur-sm rounded-lg p-2 text-center border border-blue-200/50">
-                    <div className="text-sm mb-1">💭</div>
+                  <div className="bg-white/40 backdrop-blur-sm rounded-lg p-1 text-center border border-blue-200/50">
+                    <div className="text-sm">💭</div>
                     <div className="text-sm font-bold text-blue-600">{teamPoints.honestyPoints}</div>
                     <div className="text-xs text-blue-700">本音</div>
                   </div>
