@@ -80,6 +80,8 @@ export async function getReceivedMessages(): Promise<Message[]> {
       return []
     }
 
+    console.log('🔍 Getting messages for user:', user.id, user.email)
+
     const { data: messages, error } = await supabase
       .from('messages')
       .select(`
@@ -91,13 +93,19 @@ export async function getReceivedMessages(): Promise<Message[]> {
 
     if (error) {
       console.error('Failed to fetch messages:', error)
+      console.error('Error details:', JSON.stringify(error, null, 2))
       // テーブルが存在しない場合は空配列を返す
       if (error.code === 'PGRST116' || error.message.includes('relation "messages" does not exist')) {
         console.warn('Messages table does not exist. Please run the database setup.')
         return []
       }
+      // 一時的にすべてのエラーで空配列を返す（デバッグ用）
+      console.warn('Returning empty array due to database error')
       return []
     }
+
+    console.log('✅ Retrieved messages:', messages?.length || 0, 'messages')
+    console.log('📝 Messages data:', messages)
 
     return (messages || []).map(msg => ({
       id: msg.id,

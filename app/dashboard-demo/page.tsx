@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { getUsers, type User } from '@/lib/supabase/users';
 import { getReceivedMessages, markAsRead, sendMessage, type Message } from '@/lib/supabase/message-actions';
+import { updateProfile, getCurrentUserProfile } from '@/lib/supabase/profile-actions';
 
 // 6段階成長システム関数
 function getGrowthStageIcon(totalPoints: number) {
@@ -125,11 +126,8 @@ export default function DashboardDemoPage() {
     // メッセージを読み込み
     loadMessages();
 
-    // プロフィールデータを読み込み
-    const savedProfile = localStorage.getItem('heartfelt-profile-data');
-    if (savedProfile) {
-      setProfileData(JSON.parse(savedProfile));
-    }
+    // プロフィールデータをSupabaseから読み込み
+    loadProfile();
   }, []);
 
   const loadUsers = async () => {
@@ -155,6 +153,21 @@ export default function DashboardDemoPage() {
       setMessageError('メッセージの読み込みに失敗しました');
     } finally {
       setIsLoadingMessages(false);
+    }
+  };
+
+  const loadProfile = async () => {
+    try {
+      const profile = await getCurrentUserProfile();
+      if (profile) {
+        setProfileData({
+          name: profile.name || 'あなたの名前',
+          department: profile.department || 'あなたの部署',
+          bio: 'よろしくお願いします！' // bioは使っていないのでデフォルト値
+        });
+      }
+    } catch (error) {
+      console.error('Failed to load profile:', error);
     }
   };
 
@@ -223,12 +236,16 @@ export default function DashboardDemoPage() {
     setShowThanksModal(true);
     setSelectedRecipient('');
     setMessage('');
+    // モーダルを開くたびにユーザーリストを更新
+    loadUsers();
   };
 
   const openHonestyModal = () => {
     setShowHonestyModal(true);
     setSelectedRecipient('');
     setMessage('');
+    // モーダルを開くたびにユーザーリストを更新
+    loadUsers();
   };
 
   const closeModals = () => {
@@ -267,17 +284,25 @@ export default function DashboardDemoPage() {
     setEditProfileBio('');
   };
 
-  const handleSaveProfile = () => {
-    const newProfile = {
-      name: editProfileName || 'あなたの名前',
-      department: editProfileDepartment || 'あなたの部署',
-      bio: editProfileBio || 'よろしくお願いします！'
-    };
+  const handleSaveProfile = async () => {
+    try {
+      const result = await updateProfile({
+        name: editProfileName || 'あなたの名前',
+        department: editProfileDepartment || 'あなたの部署'
+      });
 
-    setProfileData(newProfile);
-    localStorage.setItem('heartfelt-profile-data', JSON.stringify(newProfile));
-    closeProfileEditModal();
-    alert('プロフィール情報を更新しました！');
+      if (result.success) {
+        // プロフィールデータを再読み込み
+        await loadProfile();
+        closeProfileEditModal();
+        alert('プロフィール情報を更新しました！');
+      } else {
+        alert(`更新に失敗しました: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('Profile save error:', error);
+      alert('プロフィール更新中にエラーが発生しました');
+    }
   };
 
   const handleSaveGoal = () => {
