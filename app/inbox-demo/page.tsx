@@ -8,6 +8,7 @@ export default function InboxDemoPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [filter, setFilter] = useState<'all' | 'thanks' | 'honesty'>('all');
 
   // ページロード時にSupabaseからメッセージを読み込み
   useEffect(() => {
@@ -64,6 +65,12 @@ export default function InboxDemoPage() {
   const thanksCount = messages.filter(m => m.type === 'thanks').length;
   const honestyCount = messages.filter(m => m.type === 'honesty').length;
 
+  // フィルタリングされたメッセージ
+  const filteredMessages = messages.filter(message => {
+    if (filter === 'all') return true;
+    return message.type === filter;
+  });
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-purple-50 px-4 py-6 sm:px-6 sm:py-8">
       <div className="max-w-md mx-auto space-y-6 sm:space-y-8">
@@ -107,17 +114,22 @@ export default function InboxDemoPage() {
             <div className="animate-spin w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full mx-auto"></div>
             <p className="text-sm text-gray-500 mt-3">メッセージを読み込み中...</p>
           </div>
-        ) : messages.length === 0 ? (
+        ) : filteredMessages.length === 0 ? (
           <div className="bg-gray-100 rounded-lg p-8 text-center">
             <div className="text-4xl mb-4">📭</div>
-            <p className="text-gray-600">まだメッセージがありません</p>
+            <p className="text-gray-600">
+              {filter === 'all' ? 'まだメッセージがありません' : 
+               filter === 'thanks' ? 'ありがとうメッセージがありません' : 
+               '本音メッセージがありません'}
+            </p>
             <p className="text-gray-500 text-sm mt-2">
-              ダッシュボードからメッセージを送信してみてください
+              {filter === 'all' ? 'ダッシュボードからメッセージを送信してみてください' : 
+               'フィルターを変更して他のメッセージを確認してください'}
             </p>
           </div>
         ) : (
           <div className="space-y-4">
-            {messages.map((message) => (
+            {filteredMessages.map((message) => (
               <div
                 key={message.id}
                 className={`bg-white rounded-lg shadow-md p-4 border-l-4 transition-all duration-200 ${
@@ -192,6 +204,40 @@ export default function InboxDemoPage() {
               <div className="font-bold text-blue-600">{honestyCount}件</div>
             </div>
           </div>
+        </div>
+
+        {/* フィルタータブ */}
+        <div className="flex bg-white rounded-lg p-1 shadow-sm">
+          <button
+            onClick={() => setFilter('all')}
+            className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+              filter === 'all'
+                ? 'bg-purple-500 text-white'
+                : 'text-gray-600 hover:text-gray-800'
+            }`}
+          >
+            すべて ({messages.length})
+          </button>
+          <button
+            onClick={() => setFilter('thanks')}
+            className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+              filter === 'thanks'
+                ? 'bg-green-500 text-white'
+                : 'text-gray-600 hover:text-gray-800'
+            }`}
+          >
+            💚 ありがとう ({thanksCount})
+          </button>
+          <button
+            onClick={() => setFilter('honesty')}
+            className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+              filter === 'honesty'
+                ? 'bg-blue-500 text-white'
+                : 'text-gray-600 hover:text-gray-800'
+            }`}
+          >
+            💭 本音 ({honestyCount})
+          </button>
         </div>
 
         {/* アクションボタン */}
