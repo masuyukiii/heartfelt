@@ -18,7 +18,7 @@ function getGrowthStageIcon(totalPoints: number, targetPoints: number) {
   if (percentage <= 10) return '/images/growth-stages/sprout.gif'; // 芽
   if (percentage <= 30) return '/images/growth-stages/young-leaves.gif'; // 若葉
   if (percentage <= 60) return '/images/growth-stages/small-tree.gif'; // 小木
-  if (percentage <= 90) return '🌳'; // 木
+  if (percentage <= 90) return '/images/growth-stages/tree.gif'; // 木
   return '🌸'; // 花
 }
 
