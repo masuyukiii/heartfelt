@@ -1026,7 +1026,7 @@ export default function ProtectedPage() {
                 <span className="text-lg">🎯</span>
               </div>
               <p className="text-emerald-100 text-xs mb-1">
-                みんなで「ありがとう」と「本音」を伝えてゴールを目指そう！
+                ＼みんなで「ありがとう」と「本音」を伝えてゴールを目指そう！／
               </p>
               <h1 className="text-white text-lg font-bold tracking-wide">
                 ご褒美ゴール：{rewardGoal.name}
