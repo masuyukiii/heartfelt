@@ -82,14 +82,12 @@ export default function DashboardDemoPage() {
   // プロフィール情報
   const [profileData, setProfileData] = useState({
     name: 'あなたの名前',
-    email: 'your.email@example.com',
     department: 'あなたの部署',
     bio: 'よろしくお願いします！'
   });
 
   // プロフィール編集用の一時状態
   const [editProfileName, setEditProfileName] = useState('');
-  const [editProfileEmail, setEditProfileEmail] = useState('');
   const [editProfileDepartment, setEditProfileDepartment] = useState('');
   const [editProfileBio, setEditProfileBio] = useState('');
 
@@ -257,7 +255,6 @@ export default function DashboardDemoPage() {
 
   const openProfileEditModal = () => {
     setEditProfileName(profileData.name);
-    setEditProfileEmail(profileData.email);
     setEditProfileDepartment(profileData.department);
     setEditProfileBio(profileData.bio);
     setShowProfileEditModal(true);
@@ -266,7 +263,6 @@ export default function DashboardDemoPage() {
   const closeProfileEditModal = () => {
     setShowProfileEditModal(false);
     setEditProfileName('');
-    setEditProfileEmail('');
     setEditProfileDepartment('');
     setEditProfileBio('');
   };
@@ -274,7 +270,6 @@ export default function DashboardDemoPage() {
   const handleSaveProfile = () => {
     const newProfile = {
       name: editProfileName || 'あなたの名前',
-      email: editProfileEmail || 'your.email@example.com',
       department: editProfileDepartment || 'あなたの部署',
       bio: editProfileBio || 'よろしくお願いします！'
     };
@@ -909,19 +904,6 @@ export default function DashboardDemoPage() {
                     onChange={(e) => setEditProfileName(e.target.value)}
                     placeholder="あなたの名前"
                     maxLength={50}
-                    className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-gray-500 focus:outline-none transition-colors duration-200"
-                  />
-                </div>
-
-                {/* メールアドレス */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3">メールアドレス</label>
-                  <input
-                    type="email"
-                    value={editProfileEmail}
-                    onChange={(e) => setEditProfileEmail(e.target.value)}
-                    placeholder="your.email@example.com"
-                    maxLength={100}
                     className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-gray-500 focus:outline-none transition-colors duration-200"
                   />
                 </div>
