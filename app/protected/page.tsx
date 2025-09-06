@@ -1084,7 +1084,7 @@ export default function ProtectedPage() {
                         <img 
                           src={iconPath} 
                           alt="成長ステージ" 
-                          className="w-64 h-64 mx-auto object-contain"
+                          className="w-64 h-auto mx-auto object-contain"
                         />
                       );
                     }
