@@ -233,35 +233,32 @@ export default function LibraryPage() {
             </p>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="grid grid-cols-3 gap-2">
             {filteredWords.map((word) => (
               <div
                 key={word.id}
-                className={`bg-white rounded-lg p-3 border-l-4 cursor-pointer hover:shadow-md transition-shadow duration-200 ${
+                className={`rounded-xl cursor-pointer transition-shadow duration-200 p-3 ${
                   word.message_type === 'thanks' 
-                    ? 'border-green-500' 
-                    : 'border-blue-500'
+                    ? 'bg-gradient-to-b from-green-50 to-emerald-50 border border-green-200' 
+                    : 'bg-gradient-to-b from-blue-50 to-sky-50 border border-blue-200'
                 }`}
                 onClick={() => setSelectedWord(word)}
               >
-                <div className="flex items-start gap-2">
-                  <span className="text-lg">
+                <div className="text-center mb-2">
+                  <span className="text-xl">
                     {word.message_type === 'thanks' ? '💚' : '💭'}
                   </span>
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-medium text-gray-700">
-                        {word.original_sender_name || '匿名'}
-                      </span>
-                      <span className="text-xs text-gray-500">
-                        {formatTimeAgo(new Date(word.saved_at))}
-                      </span>
-                    </div>
-                    <p className="text-sm text-gray-800 line-clamp-2">
-                      {word.message_content}
-                    </p>
-                  </div>
                 </div>
+                
+                <div className="text-center mb-2">
+                  <span className="text-[10px] text-gray-500">
+                    {word.original_sender_name || '匿名'}
+                  </span>
+                </div>
+                
+                <p className="text-[10px] text-gray-600 text-center line-clamp-4 leading-relaxed">
+                  {word.message_content}
+                </p>
               </div>
             ))}
           </div>
