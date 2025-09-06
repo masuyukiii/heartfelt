@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { getUsers, type User } from '@/lib/supabase/users';
 import { getReceivedMessages, markAsRead, sendMessage, type Message } from '@/lib/supabase/message-actions';
 import { updateProfile, getCurrentUserProfile } from '@/lib/supabase/profile-actions';
+import { getAIFeedback, type ChatMessage } from '@/lib/claude/ai-assistant';
 
 // 6段階成長システム関数
 function getGrowthStageIcon(totalPoints: number) {
@@ -62,6 +63,12 @@ export default function DashboardDemoPage() {
   const [selectedRecipient, setSelectedRecipient] = useState('');
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // AI添削機能用の状態
+  const [showAIChat, setShowAIChat] = useState(false);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [aiInput, setAiInput] = useState('');
+  const [isAIProcessing, setIsAIProcessing] = useState(false);
   
   // 受信BOX用の状態
   const [messages, setMessages] = useState<Message[]>([]);
@@ -343,6 +350,76 @@ export default function DashboardDemoPage() {
     } else {
       alert('ご褒美ゴールを更新しました！');
     }
+  };
+
+  // AI添削機能の処理
+  const handleStartAIChat = () => {
+    if (!message.trim()) {
+      alert('まず、伝えたいことを入力してください');
+      return;
+    }
+    
+    setAiInput(message);
+    setShowAIChat(true);
+    setChatMessages([]);
+    
+    // 最初のAI応答を生成
+    handleSendAIMessage(message, true);
+  };
+
+  const handleSendAIMessage = async (text: string, isInitial = false) => {
+    if (!text.trim() && !isInitial) return;
+    
+    setIsAIProcessing(true);
+    
+    try {
+      // ユーザーメッセージを追加（初回は既存のメッセージ内容）
+      const userMessage: ChatMessage = {
+        id: Date.now().toString(),
+        role: 'user',
+        content: isInitial ? `「${text}」という内容を相手にポジティブに伝えたいのですが、どう表現したらよいでしょうか？` : text,
+        timestamp: new Date()
+      };
+      
+      const updatedChatMessages = [...chatMessages, userMessage];
+      setChatMessages(updatedChatMessages);
+      
+      // AI応答を取得
+      const response = await getAIFeedback(text, chatMessages);
+      
+      if (response.success && response.message) {
+        const aiMessage: ChatMessage = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: response.message,
+          timestamp: new Date()
+        };
+        
+        setChatMessages([...updatedChatMessages, aiMessage]);
+        
+        // 【完成版】が含まれている場合、メッセージを自動更新
+        if (response.message.includes('【完成版】')) {
+          const finalVersionMatch = response.message.match(/【完成版】\s*(.+?)(?:\n|$)/);
+          if (finalVersionMatch && finalVersionMatch[1]) {
+            const finalText = finalVersionMatch[1].trim();
+            setMessage(finalText);
+          }
+        }
+      } else {
+        alert(`AI応答エラー: ${response.error}`);
+      }
+    } catch (error) {
+      console.error('AI message error:', error);
+      alert('AI機能でエラーが発生しました');
+    } finally {
+      setIsAIProcessing(false);
+    }
+  };
+
+  const closeAIChat = () => {
+    setShowAIChat(false);
+    setChatMessages([]);
+    setAiInput('');
   };
 
   const handleSubmit = async (type: 'thanks' | 'honesty') => {
@@ -865,6 +942,102 @@ export default function DashboardDemoPage() {
                     className="w-full h-32 p-4 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none resize-none transition-colors duration-200"
                   />
                 </div>
+
+                {/* AI添削ボタン */}
+                <div className="border-t pt-4">
+                  <button
+                    onClick={handleStartAIChat}
+                    disabled={!message.trim()}
+                    className={`w-full py-3 rounded-xl font-semibold transition-all duration-200 ${
+                      message.trim()
+                        ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:shadow-lg hover:scale-105'
+                        : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                    }`}
+                  >
+                    🤖 AI先生に添削してもらう
+                  </button>
+                </div>
+
+                {/* AI チャットUI */}
+                {showAIChat && (
+                  <div className="border-2 border-gray-300 rounded-xl p-4 bg-white shadow-md">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="font-bold text-gray-800">💬 AI添削アシスタント</h3>
+                      <button 
+                        onClick={closeAIChat}
+                        className="text-gray-500 hover:bg-gray-100 rounded-full p-1"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                    
+                    {/* チャット履歴 */}
+                    <div className="max-h-60 overflow-y-auto mb-4 space-y-3">
+                      {chatMessages.map((msg) => (
+                        <div
+                          key={msg.id}
+                          className={`p-3 rounded-lg ${
+                            msg.role === 'user'
+                              ? 'bg-blue-50 border border-blue-200 ml-4'
+                              : 'bg-gray-50 border border-gray-200 mr-4'
+                          }`}
+                        >
+                          <div className="flex items-start space-x-2">
+                            <span className="text-sm">
+                              {msg.role === 'user' ? '👤' : '🤖'}
+                            </span>
+                            <div className="flex-1">
+                              <p className="text-sm text-gray-800 whitespace-pre-wrap">{msg.content}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                      {isAIProcessing && (
+                        <div className="bg-gray-50 border border-gray-200 mr-4 p-3 rounded-lg">
+                          <div className="flex items-center space-x-2">
+                            <span className="text-sm">🤖</span>
+                            <div className="flex space-x-1">
+                              <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
+                              <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                              <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* チャット入力 */}
+                    <div className="flex space-x-2">
+                      <input
+                        type="text"
+                        value={aiInput}
+                        onChange={(e) => setAiInput(e.target.value)}
+                        placeholder="追加の質問や要望があればどうぞ..."
+                        className="flex-1 p-2 border border-gray-300 rounded-lg focus:border-blue-400 focus:outline-none text-gray-800"
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter' && !isAIProcessing) {
+                            handleSendAIMessage(aiInput);
+                            setAiInput('');
+                          }
+                        }}
+                      />
+                      <button
+                        onClick={() => {
+                          handleSendAIMessage(aiInput);
+                          setAiInput('');
+                        }}
+                        disabled={!aiInput.trim() || isAIProcessing}
+                        className={`px-4 py-2 rounded-lg font-semibold ${
+                          aiInput.trim() && !isAIProcessing
+                            ? 'bg-blue-500 text-white hover:bg-blue-600'
+                            : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                        }`}
+                      >
+                        送信
+                      </button>
+                    </div>
+                  </div>
+                )}
 
                 {/* 送信ボタン */}
                 <button
