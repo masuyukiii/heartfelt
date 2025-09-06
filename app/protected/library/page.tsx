@@ -260,42 +260,34 @@ export default function LibraryPage() {
             {filteredWords.map((word) => (
               <div
                 key={word.id}
-                className={`relative bg-white rounded-2xl shadow-lg p-4 transition-all duration-300 cursor-pointer hover:shadow-xl hover:scale-105 ${
+                className={`relative rounded-xl shadow-md p-4 transition-all duration-300 cursor-pointer hover:shadow-lg hover:scale-105 ${
                   word.message_type === 'thanks' 
-                    ? 'bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200' 
-                    : 'bg-gradient-to-br from-blue-50 to-sky-50 border border-blue-200'
+                    ? 'bg-gradient-to-br from-green-50/50 via-emerald-50/30 to-teal-50/20 border border-green-100/50' 
+                    : 'bg-gradient-to-br from-blue-50/50 via-sky-50/30 to-indigo-50/20 border border-blue-100/50'
                 }`}
                 onClick={() => setSelectedWord(word)}
+                style={{
+                  background: word.message_type === 'thanks' 
+                    ? 'linear-gradient(135deg, rgba(240, 253, 244, 0.8), rgba(236, 252, 248, 0.6))'
+                    : 'linear-gradient(135deg, rgba(239, 246, 255, 0.8), rgba(238, 242, 255, 0.6))',
+                  backdropFilter: 'blur(10px)'
+                }}
               >
-                <div className="text-center mb-3">
-                  <span className="text-3xl">
+                <div className="text-center mb-2">
+                  <span className="text-2xl">
                     {word.message_type === 'thanks' ? '💚' : '💭'}
                   </span>
                 </div>
                 
-                <div className="text-center mb-2">
-                  <span className="text-xs font-medium text-gray-600">
+                <div className="text-center mb-3">
+                  <span className="text-xs font-medium text-gray-500">
                     {word.original_sender_name || '匿名'}
                   </span>
                 </div>
                 
-                <div className={`text-center mb-2 px-3 py-1 rounded-full text-xs font-medium inline-block w-full ${
-                  word.message_type === 'thanks' 
-                    ? 'bg-green-100 text-green-700' 
-                    : 'bg-blue-100 text-blue-700'
-                }`}>
-                  {word.message_type === 'thanks' ? 'ありがとう' : '本音'}
-                </div>
-                
-                <p className="text-sm text-gray-700 text-center line-clamp-3 mb-2">
+                <p className="text-xs text-gray-600 text-center line-clamp-4 leading-relaxed">
                   {word.message_content}
                 </p>
-                
-                <div className="text-center">
-                  <span className="text-xs text-gray-500">
-                    {formatTimeAgo(new Date(word.saved_at))}
-                  </span>
-                </div>
               </div>
             ))}
           </div>
