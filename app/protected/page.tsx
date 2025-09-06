@@ -61,6 +61,7 @@ export default function ProtectedPage() {
   const [aiInput, setAiInput] = useState('');
   const [isAIProcessing, setIsAIProcessing] = useState(false);
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
+  const [showDemoControls, setShowDemoControls] = useState(false);
   
   // 感謝キーワードタグ
   const [currentKeywords, setCurrentKeywords] = useState<string[]>([]);
@@ -1012,27 +1013,40 @@ export default function ProtectedPage() {
 
       <div className="max-w-md mx-auto p-4">
         {/* デモコントロール */}
-        <div className="mb-4 bg-white/80 backdrop-blur-sm rounded-2xl p-3 shadow-sm">
-          <div className="flex gap-2 justify-center">
-            <button 
-              onClick={() => addPoints('thanks')} 
-              className="text-xs bg-gradient-to-r from-pink-500 to-rose-500 text-white px-3 py-1.5 rounded-full hover:shadow-md transition-all duration-200 hover:scale-105"
-            >
-              💖 +1
-            </button>
-            <button 
-              onClick={() => addPoints('honesty')} 
-              className="text-xs bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-3 py-1.5 rounded-full hover:shadow-md transition-all duration-200 hover:scale-105"
-            >
-              💭 +1
-            </button>
-            <button 
-              onClick={resetPoints} 
-              className="text-xs bg-gradient-to-r from-gray-400 to-gray-500 text-white px-3 py-1.5 rounded-full hover:shadow-md transition-all duration-200 hover:scale-105"
-            >
-              リセット
-            </button>
-          </div>
+        <div className="mb-4 bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm overflow-hidden">
+          <button
+            onClick={() => setShowDemoControls(!showDemoControls)}
+            className="w-full px-3 py-2 flex items-center justify-between text-xs text-gray-600 hover:bg-gray-50 transition-colors duration-200"
+          >
+            <span className="font-medium">🔧 開発者向けデモコントロール</span>
+            <span className={`transform transition-transform duration-200 ${showDemoControls ? 'rotate-180' : ''}`}>
+              ▼
+            </span>
+          </button>
+          {showDemoControls && (
+            <div className="p-3 border-t border-gray-100">
+              <div className="flex gap-2 justify-center">
+                <button 
+                  onClick={() => addPoints('thanks')} 
+                  className="text-xs bg-gradient-to-r from-pink-500 to-rose-500 text-white px-3 py-1.5 rounded-full hover:shadow-md transition-all duration-200 hover:scale-105"
+                >
+                  💖 +1
+                </button>
+                <button 
+                  onClick={() => addPoints('honesty')} 
+                  className="text-xs bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-3 py-1.5 rounded-full hover:shadow-md transition-all duration-200 hover:scale-105"
+                >
+                  💭 +1
+                </button>
+                <button 
+                  onClick={resetPoints} 
+                  className="text-xs bg-gradient-to-r from-gray-400 to-gray-500 text-white px-3 py-1.5 rounded-full hover:shadow-md transition-all duration-200 hover:scale-105"
+                >
+                  リセット
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* メインカード */}
