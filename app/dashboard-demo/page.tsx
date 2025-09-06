@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { getUsers, type User } from '@/lib/supabase/users';
-import { getReceivedMessages, markAsRead, type Message } from '@/lib/supabase/message-actions';
+import { getReceivedMessages, markAsRead, sendMessage, type Message } from '@/lib/supabase/message-actions';
 
 // 6段階成長システム関数
 function getGrowthStageIcon(totalPoints: number) {
@@ -325,50 +325,37 @@ export default function DashboardDemoPage() {
     
     setIsSubmitting(true);
     
-    // 送信シミュレーション
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    // 送信したメッセージに対する返信を受信ボックスに追加（自分宛）
-    const recipients = users.length > 0 ? users : mockRecipients;
-    const selectedRecipientData = recipients.find(r => r.id === selectedRecipient);
-    if (selectedRecipientData) {
-      // 送信したメッセージに対する自動返信を生成
-      const recipientName = ('email' in selectedRecipientData) 
-        ? (selectedRecipientData.name || selectedRecipientData.email || '匿名ユーザー')
-        : selectedRecipientData.name;
-      const replyMessage = generateAutoReply(type, recipientName, message);
-      
-      const newMessage = {
-        id: Date.now().toString(),
+    try {
+      // 実際のSupabaseにメッセージを送信
+      const result = await sendMessage({
+        recipientId: selectedRecipient,
         type: type,
-        sender: recipientName,
-        content: replyMessage,
-        receivedAt: '今',
-        isRead: false
-      };
+        content: message.trim()
+      });
       
-      // 既存のメッセージを取得
-      const existingMessages = JSON.parse(localStorage.getItem('heartfelt-inbox-messages') || '[]');
-      
-      // 新しいメッセージを先頭に追加
-      const updatedMessages = [newMessage, ...existingMessages];
-      
-      // ローカルストレージに保存
-      localStorage.setItem('heartfelt-inbox-messages', JSON.stringify(updatedMessages));
+      if (result.success) {
+        // ポイント追加
+        addPoints(type);
+        
+        // 成功メッセージとモーダル閉じる
+        setIsSubmitting(false);
+        closeModals();
+        
+        // 成功通知
+        alert(`${type === 'thanks' ? 'ありがとう' : '本音'}メッセージを送信しました！`);
+        
+        // メッセージリストを更新
+        loadMessages();
+      } else {
+        // エラー処理
+        setIsSubmitting(false);
+        alert(`送信に失敗しました: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('Message send error:', error);
+      setIsSubmitting(false);
+      alert('メッセージ送信中にエラーが発生しました');
     }
-    
-    // ポイント追加
-    addPoints(type);
-    
-    // 成功メッセージとモーダル閉じる
-    setIsSubmitting(false);
-    closeModals();
-    
-    // 簡単な成功通知
-    alert(`${type === 'thanks' ? 'ありがとう' : '本音'}メッセージを送信しました！\n受信BOXで確認できます。`);
-    
-    // メッセージリストを更新
-    loadMessages();
   };
 
   // 受信BOXビューの場合
