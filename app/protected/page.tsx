@@ -1025,7 +1025,7 @@ export default function ProtectedPage() {
               <div className="inline-flex items-center justify-center w-8 h-8 bg-white/20 rounded-full mb-1">
                 <span className="text-lg">🎯</span>
               </div>
-              <p className="text-emerald-100 text-xs mb-1">
+              <p className="text-indigo-900 text-xs mb-1 font-medium">
                 ＼みんなで「ありがとう」と「本音」を伝えてゴールを目指そう！／
               </p>
               <h1 className="text-white text-lg font-bold tracking-wide">
