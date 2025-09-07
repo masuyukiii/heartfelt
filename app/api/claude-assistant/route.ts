@@ -34,10 +34,11 @@ export async function POST(request: NextRequest) {
     // 会話履歴をメッセージ配列に変換
     const messages = []
     
-    // 既存の会話履歴がある場合は追加
+    // 既存の会話履歴がある場合は追加（最新10件のみ）
     if (conversationContext) {
       const contextLines = conversationContext.split('\n').filter((line: string) => line.trim())
-      for (const line of contextLines) {
+      const recentLines = contextLines.slice(-20) // 最新20行（約10往復）のみ
+      for (const line of recentLines) {
         if (line.startsWith('user: ')) {
           messages.push({
             role: 'user',
@@ -67,7 +68,7 @@ export async function POST(request: NextRequest) {
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
-        max_tokens: 2000,
+        max_tokens: 1000,
         system: systemPrompt, // 正しいsystemプロンプトの設定
         messages: messages
       })
