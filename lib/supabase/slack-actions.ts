@@ -78,7 +78,7 @@ export async function postToSlack(message: {
     const typeText = message.type === 'thanks' ? 'ありがとう' : '本音'
     
     const slackMessage = {
-      channel: settings.channel,
+      channel: settings.channel.startsWith('#') ? settings.channel : `#${settings.channel}`,
       username: 'Heartfelt Bot',
       icon_emoji: ':heart:',
       text: `${emoji} ${message.sender_name}さんから${message.recipient_name}さんへ「${typeText}メッセージ」が届いたよ！\n\n内容はこれだよ：\n> ${message.content}`
