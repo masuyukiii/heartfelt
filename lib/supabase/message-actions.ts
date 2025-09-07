@@ -1,5 +1,4 @@
 import { createClient } from '@/lib/supabase/client'
-import { postToSlack } from '@/lib/supabase/slack-actions'
 
 export interface Message {
   id: string
@@ -59,41 +58,6 @@ export async function sendMessage(data: {
       throw new Error(`メッセージ送信エラー: ${error.message}`)
     }
 
-    // ありがとうメッセージの場合はSlackに投稿
-    if (data.type === 'thanks') {
-      try {
-        // 送信者と受信者の名前を取得
-        const { data: senderProfile } = await supabase
-          .from('profiles')
-          .select('name, email')
-          .eq('id', user.id)
-          .single()
-        
-        const { data: recipientProfile } = await supabase
-          .from('profiles')
-          .select('name, email')
-          .eq('id', data.recipientId)
-          .single()
-        
-        const senderName = senderProfile?.name || senderProfile?.email?.split('@')[0] || '匿名ユーザー'
-        const recipientName = recipientProfile?.name || recipientProfile?.email?.split('@')[0] || '匿名ユーザー'
-        
-        const slackResult = await postToSlack({
-          sender_name: senderName,
-          recipient_name: recipientName,
-          content: data.content.trim(),
-          type: data.type
-        })
-        
-        if (!slackResult.success) {
-          console.warn('Slack投稿に失敗しましたが、メッセージ送信は成功:', slackResult.error)
-        } else {
-          console.log('✅ Slack投稿成功')
-        }
-      } catch (slackError) {
-        console.warn('Slack投稿中にエラーが発生しましたが、メッセージ送信は成功:', slackError)
-      }
-    }
 
     return { success: true }
   } catch (error) {
