@@ -98,6 +98,8 @@ If you wish to just develop locally and not deploy to Vercel, [follow the steps 
 
 - アーキテクチャ: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 - セットアップ: [docs/SETUP.md](docs/SETUP.md)
+- 開発手順ガイド: [docs/DEVELOPMENT_GUIDE.md](docs/DEVELOPMENT_GUIDE.md)
+- MCP/AI運用ガイド: [docs/MCP.md](docs/MCP.md)
 
 ## Feedback and issues
 

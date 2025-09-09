@@ -46,6 +46,71 @@
 - shadcn/ui と Tailwind を採用。`components.json` を置き換えることでテーマ再構成可能。
 
 ### 今後の拡張ポイント
+---
+
+## はじめての人向け：このアプリの仕組み（やさしい説明）
+
+### 1. Webアプリは「箱がいくつかある」イメージ
+- ブラウザ（あなたが見る画面）
+- サーバ（見えない裏側で動く脳みそ）
+- データベース（アプリの記録ノート）
+
+Heartfelt では、ブラウザとサーバの両方で Supabase というサービスを使っています。Supabase は「ログイン管理」と「データベース」をまとめて提供してくれる便利なサービスです。
+
+### 2. ログインのながれ（ざっくり）
+1. ログイン画面でメールとパスワードを入力
+2. Supabase がユーザーを確認し、ログイン成功なら「Cookie（合言葉）」を発行
+3. 次からはこの合言葉を使って、あなたが「本人」であることをアプリに伝えます
+
+この合言葉は、ページの移動のたびにミドルウェアがチェックして、必要ならログイン画面に案内します。
+
+### 3. フロント（見える部分）とバック（見えない部分）の役割
+- 見える部分（`app/**/page.tsx`）は React の画面
+- 見えない部分（`app/api/**/route.ts`）は API の入り口（AIの呼び出しなど）
+
+### 4. コードの読む順番（迷子にならないコツ）
+1. `app/page.tsx`（トップページ）
+2. `app/auth/login/page.tsx`（ログイン）
+3. `middleware.ts`（ログインチェック）
+4. `lib/supabase/*`（Supabase の使い方が集まっている）
+5. `app/positive-writer/*`（アプリ固有の機能例）
+
+### 5. よくある質問
+- どうしたらログイン必須にできる？→ 何もしなくてもミドルウェアが未ログイン時にログインへ誘導。特定ページだけ許可したいときは `middleware.ts` の `matcher` を調整。
+- エラーが出たら？→ まず `.env.local` の URL/キーが正しいか、`lib/supabase/server.ts` のエラーメッセージを確認。
+- API キーがなくても動く？→ はい。AI 機能はフォールバック動作があります（`app/api/positive-writer/route.ts`）。
+
+---
+
+## AI・外部APIの構成
+
+### Positive Writer API（OpenAI / Claude フォールバック）
+- エンドポイント: `POST /api/positive-writer`
+- 役割: 入力メッセージをポジティブに添削
+- キー設定: `OPENAI_API_KEY` または `ANTHROPIC_API_KEY`（どちらも未設定ならフォールバックで模擬応答）
+
+### Claude Assistant API（テンプレ付き汎用呼び出し）
+- エンドポイント: `POST /api/claude-assistant`
+- 入力: `message`, `systemPrompt`, `conversationContext`
+- モデル: `claude-sonnet-4-20250514`
+
+---
+
+## MCP（Model Context Protocol）と運用メモ
+
+本リポジトリには直接の MCP 実装コードは含まれていませんが、以下の運用メモ・プロンプト設計ドキュメントが存在します。
+
+- `CLAUDE.md`: 開発アシスタント（Claude Code）向けの作業方針。修正後は自動コミット/プッシュの運用を明記。
+- `honne_prompt.md`: 「AI先生」用のシステムプロンプトテンプレート。関係性別の口調・構成・出力形式を定義。
+- `heartfelt.md`: プロダクトのコンセプト/機能説明（非技術者向け）。
+
+MCP（外部ツール統合）自体を導入する場合は、以下の方針が推奨です：
+1. 使いたいツールを特定（例: Linear、GitHub、Database、Slack）
+2. 実装場所の決定（Edge Functions や Route Handlers でのプロキシ）
+3. 最小権限の API キー管理（Vercel / Supabase Config Vars）
+4. 入出力の JSON スキーマ定義とバリデーション（zod 等）
+5. 監査ログの保存（Supabase に操作ログテーブルを用意）
+
 - 役割ベースの認可（RLS/Edge Functions 連携）。
 - API ルートのサービス分割と入力バリデーション（zod 等）。
 - 監視（ログ/メトリクス）とエラーハンドリングの標準化。
