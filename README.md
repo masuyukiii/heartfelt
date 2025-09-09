@@ -94,6 +94,11 @@ If you wish to just develop locally and not deploy to Vercel, [follow the steps 
 
 > Check out [the docs for Local Development](https://supabase.com/docs/guides/getting-started/local-development) to also run Supabase locally.
 
+## Project docs
+
+- アーキテクチャ: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+- セットアップ: [docs/SETUP.md](docs/SETUP.md)
+
 ## Feedback and issues
 
 Please file feedback and issues over on the [Supabase GitHub org](https://github.com/supabase/supabase/issues/new/choose).
